@@ -1,21 +1,25 @@
 package org.delcom.app.dto;
 
 import java.util.UUID;
+import jakarta.validation.constraints.NotBlank;
 
-public class TodoForm {
+public class RecipeForm {
 
     private UUID id;
 
+    @NotBlank(message = "Judul resep tidak boleh kosong")
     private String title;
 
+    @NotBlank(message = "Deskripsi resep tidak boleh kosong")
     private String description;
 
-    private boolean isFinished = false;
+    @NotBlank(message = "Bahan-bahan tidak boleh kosong")
+    private String ingredients;
 
-    private String confirmTitle;
+    private String confirmTitle; // Untuk konfirmasi saat delete (opsional, mirip TodoForm)
 
     // Constructor
-    public TodoForm() {
+    public RecipeForm() {
     }
 
     // Getters and Setters
@@ -43,12 +47,12 @@ public class TodoForm {
         this.description = description;
     }
 
-    public boolean getIsFinished() {
-        return isFinished;
+    public String getIngredients() {
+        return ingredients;
     }
 
-    public void setIsFinished(boolean isFinished) {
-        this.isFinished = isFinished;
+    public void setIngredients(String ingredients) {
+        this.ingredients = ingredients;
     }
 
     public String getConfirmTitle() {

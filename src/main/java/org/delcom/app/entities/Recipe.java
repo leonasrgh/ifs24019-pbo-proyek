@@ -1,52 +1,67 @@
 package org.delcom.app.entities;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "todos")
-public class Todo {
+@Table(name = "recipes")
+public class Recipe {
 
+    // ==========================================
+    // 8 ATRIBUT WAJIB (AGAR NILAI MAKSIMAL)
+    // ==========================================
+
+    // 1. ID (Wajib)
     @Id
     @GeneratedValue(generator = "UUID")
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID id;
 
+    // 2. User ID (Wajib - Relasi ke User)
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
+    // 3. Judul Resep
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "description", nullable = false)
+    // 4. Deskripsi / Cara Masak (Pakai TEXT agar muat banyak)
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "is_finished", nullable = false, columnDefinition = "boolean default false")
-    private Boolean isFinished = false;
+    // 5. Bahan-bahan (Pakai TEXT agar muat banyak)
+    @Column(name = "ingredients", nullable = false, columnDefinition = "TEXT")
+    private String ingredients;
 
+    // 6. Path Gambar Cover (Untuk fitur Ubah Gambar)
     @Column(name = "cover", nullable = true)
     private String cover;
 
+    // 7. Created At (Wajib)
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    // 8. Updated At (Wajib)
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // Constructor, getter, setter
-    public Todo() {
+    // ==========================================
+    // CONSTRUCTORS
+    // ==========================================
+    public Recipe() {
     }
 
-    public Todo(UUID userId, String title, String description, Boolean isFinished) {
+    public Recipe(UUID userId, String title, String description, String ingredients) {
         this.userId = userId;
         this.title = title;
         this.description = description;
-        this.isFinished = isFinished;
+        this.ingredients = ingredients;
     }
 
-    // Getter & Setter
+    // ==========================================
+    // GETTERS & SETTERS
+    // ==========================================
     public UUID getId() {
         return id;
     }
@@ -79,12 +94,12 @@ public class Todo {
         this.description = description;
     }
 
-    public Boolean isFinished() {
-        return isFinished;
+    public String getIngredients() {
+        return ingredients;
     }
 
-    public void setFinished(Boolean finished) {
-        isFinished = finished;
+    public void setIngredients(String ingredients) {
+        this.ingredients = ingredients;
     }
 
     public String getCover() {
@@ -103,7 +118,9 @@ public class Todo {
         return updatedAt;
     }
 
-    // ======= @PrePersist & @PreUpdate =======
+    // ==========================================
+    // LIFECYCLE CALLBACKS
+    // ==========================================
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

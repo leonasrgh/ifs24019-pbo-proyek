@@ -15,8 +15,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(authInterceptor)
-                .addPathPatterns("/api/**") // Terapkan ke semua endpoint /api
-                .excludePathPatterns("/api/auth/**") // Kecuali endpoint auth
-                .excludePathPatterns("/api/public/**"); // Dan endpoint public
+                .addPathPatterns("/**") // Terapkan ke SEMUA request (termasuk halaman HTML)
+                .excludePathPatterns(
+                        "/auth/**",          // Login & Register bebas akses
+                        "/assets/**",        // CSS, JS, Gambar bebas akses
+                        "/error",            // Halaman error
+                        "/favicon.ico"       // Icon browser
+                );
     }
 }

@@ -9,7 +9,7 @@ import jakarta.validation.ValidatorFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class LoginFormTest {
+class LoginFormTests {
 
     private LoginForm loginForm;
     private Validator validator;

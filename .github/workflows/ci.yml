@@ -14,7 +14,7 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: db_pbo_app
+          POSTGRES_DB: db_pbo_proyek
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
@@ -35,9 +35,13 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      # KOREKSI: Mengambil template dari src/main/resources
       - name: Copy and configure application.properties
         run: |
           cp src/main/resources/application.properties.template src/main/resources/application.properties
+          
+          # Mengatur koneksi database untuk lingkungan CI (Docker Service)
+          sed -i 's|spring.datasource.url=.*|spring.datasource.url=jdbc:postgresql://localhost:5432/db_pbo_proyek|g' src/main/resources/application.properties
           sed -i 's|spring.datasource.username=.*|spring.datasource.username=postgres|g' src/main/resources/application.properties
           sed -i 's|spring.datasource.password=.*|spring.datasource.password=postgres|g' src/main/resources/application.properties
 
@@ -49,7 +53,6 @@ jobs:
             sleep 5
           done
 
-      # Jalankan unit test + coverage
       - name: Run tests with coverage
         run: |
           chmod +x mvnw
@@ -61,26 +64,14 @@ jobs:
           name: test-results
           path: target/site/jacoco/
 
-      # 🔹 Tambahkan build JAR
       - name: Build Spring Boot JAR
         run: |
           ./mvnw clean package -DskipTests
 
-      # 🔹 Verifikasi bahwa JAR memiliki manifest dan dapat dijalankan
       - name: Verify executable JAR
         run: |
           echo "Checking manifest..."
           jar tf target/*.jar | grep META-INF/MANIFEST.MF
-          jar xf target/*.jar META-INF/MANIFEST.MF
-          cat META-INF/MANIFEST.MF
-          echo "Testing java -jar startup..."
           java -jar target/*.jar --spring.main.web-application-type=none --logging.level.root=OFF &
-          sleep 10
+          sleep 15
           pkill -f 'java -jar' || true
-
-      # 🔹 Upload hasil build (opsional)
-      - name: Upload JAR artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: spring-boot-app
-          path: target/*.jar
