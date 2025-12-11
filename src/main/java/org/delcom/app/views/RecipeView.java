@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping("/recipes")
+@RequestMapping("/recipes-backup")
 public class RecipeView {
 
     private final RecipeService recipeService;
