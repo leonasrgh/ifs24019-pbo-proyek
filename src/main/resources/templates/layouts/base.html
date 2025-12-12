@@ -17,7 +17,9 @@
     <link rel="icon" th:href="@{/assets/images/logo.png}" type="image/x-icon" />
 
     <!-- Judul -->
-    <title layout:title-pattern="$CONTENT_TITLE">Spring Boot Todolist</title>
+    <title layout:title-pattern="$CONTENT_TITLE">
+      Nutrition App - Sistem Nutrisi Makanan
+    </title>
 
     <!-- Styles -->
     <link
@@ -30,15 +32,137 @@
       th:href="@{/assets/vendor/sweetalert2/dist/sweetalert2.min.css}"
     />
 
+    <!-- Custom Styles untuk Nutrition App -->
+    <style>
+      /* Header Navbar */
+      .navbar-nutrition {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Card Hover Effects */
+      .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Badge Category Styles */
+      .badge {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+      }
+
+      /* Food Card Image */
+      .card-img-top {
+        border-radius: 0.375rem 0.375rem 0 0;
+      }
+
+      /* Nutrition Stats */
+      .nutrition-stat {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background: #f8f9fa;
+        text-align: center;
+      }
+
+      /* Footer */
+      .footer-nutrition {
+        background: #343a40;
+        color: #fff;
+        padding: 2rem 0;
+        margin-top: 4rem;
+      }
+    </style>
+
     <!-- Slot untuk CSS tambahan -->
     <th:block layout:fragment="others-css"></th:block>
   </head>
 
   <body class="bg-light">
-    <!-- Slot untuk konten -->
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-nutrition sticky-top">
+      <div class="container-fluid">
+        <a class="navbar-brand fw-bold" th:href="@{/}">
+          🍎 Nutrition App
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" th:href="@{/}">
+                🏠 Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" th:href="@{/foods}">
+                📋 Daftar Makanan
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" th:href="@{/foods/statistics}">
+                📊 Statistik Nutrisi
+              </a>
+            </li>
+          </ul>
+
+          <!-- User Info & Logout -->
+          <ul class="navbar-nav ms-auto" th:if="${auth}">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="userDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+              >
+                👤 <span th:text="${auth.name}">User</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <a class="dropdown-item" href="#">
+                    📧 <span th:text="${auth.email}">email@example.com</span>
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a class="dropdown-item" th:href="@{/auth/logout}">
+                    🚪 Logout
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
     <div layout:fragment="content" class="container-fluid">
       <!-- Konten akan diisi oleh child templates -->
     </div>
+
+    <!-- Footer -->
+    <footer class="footer-nutrition text-center">
+      <div class="container">
+        <p class="mb-2">
+          🍎 <strong>Nutrition App</strong> - Sistem Informasi Nutrisi Makanan
+        </p>
+        <p class="small text-muted mb-0">
+          Proyek Akhir PBO &copy; 2025 | Dibuat dengan ❤️ menggunakan Spring Boot
+        </p>
+      </div>
+    </footer>
 
     <!-- Bootstrap -->
     <script
@@ -57,9 +181,10 @@
         if (successMessage && successMessage.length > 5) {
           Swal.fire({
             icon: "success",
-            title: "Berhasil Melakukan Tindakan",
+            title: "✅ Berhasil!",
             text: successMessage,
             showConfirmButton: true,
+            confirmButtonColor: "#667eea",
           });
         }
 
@@ -68,9 +193,10 @@
         if (errorMessage && errorMessage.length > 5) {
           Swal.fire({
             icon: "error",
-            title: "Gagal Melakukan Tindakan",
+            title: "❌ Gagal!",
             text: errorMessage,
             showConfirmButton: true,
+            confirmButtonColor: "#dc3545",
           });
         }
       });

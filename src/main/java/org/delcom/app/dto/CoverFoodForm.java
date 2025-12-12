@@ -4,7 +4,7 @@ import java.util.UUID;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.constraints.NotNull;
 
-public class CoverTodoForm {
+public class CoverFoodForm {
 
     private UUID id;
 
@@ -12,7 +12,7 @@ public class CoverTodoForm {
     private MultipartFile coverFile;
 
     // Constructor
-    public CoverTodoForm() {
+    public CoverFoodForm() {
     }
 
     // Getters and Setters
@@ -41,6 +41,14 @@ public class CoverTodoForm {
         return coverFile != null ? coverFile.getOriginalFilename() : null;
     }
 
+    public long getFileSize() {
+        return coverFile != null ? coverFile.getSize() : 0;
+    }
+
+    public String getContentType() {
+        return coverFile != null ? coverFile.getContentType() : null;
+    }
+
     // Validation methods
     public boolean isValidImage() {
         if (this.isEmpty()) {
@@ -50,12 +58,31 @@ public class CoverTodoForm {
         String contentType = coverFile.getContentType();
         return contentType != null &&
                 (contentType.equals("image/jpeg") ||
+                        contentType.equals("image/jpg") ||
                         contentType.equals("image/png") ||
                         contentType.equals("image/gif") ||
                         contentType.equals("image/webp"));
     }
 
-    public boolean isSizeValid(long maxSize) {
-        return coverFile != null && coverFile.getSize() <= maxSize;
+    public boolean isSizeValid(long maxSizeInBytes) {
+        return coverFile != null && coverFile.getSize() <= maxSizeInBytes;
+    }
+
+    // Ukuran maksimal 5MB (default)
+    public boolean isSizeValid() {
+        return isSizeValid(5 * 1024 * 1024); // 5MB
+    }
+
+    public String getValidationError() {
+        if (isEmpty()) {
+            return "Cover file tidak boleh kosong";
+        }
+        if (!isValidImage()) {
+            return "Format image tidak valid. Hanya menerima JPEG, PNG, GIF, atau WebP";
+        }
+        if (!isSizeValid()) {
+            return "Ukuran image terlalu besar. Maksimal 5MB";
+        }
+        return null;
     }
 }

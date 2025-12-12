@@ -6,169 +6,264 @@
   lang="id"
 >
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Spring Boot Todolist</title>
+    <title>Dashboard - Nutrition App</title>
   </head>
-  <body>
-    <div layout:fragment="content" class="mt-3">
-      <div class="card">
-        <div class="card-header d-flex">
-          <div class="flex-fill">
-            <h3>Hay, [[${auth.name}]]</h3>
-          </div>
-          <div>
-            <div>
-              <a th:href="@{/auth/logout}" class="btn btn-sm btn-danger"
-                >Keluar</a
-              >
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="d-flex mb-2">
-            <div class="flex-fill">
-              <h3>Daftar Todo List</h3>
-            </div>
-            <div>
-              <button
-                class="btn btn-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#addTodoModal"
-              >
-                Tambah Todo
-              </button>
-            </div>
-          </div>
-          <table class="table table-striped">
-            <tr class="table-light">
-              <th>No</th>
-              <th>Judul</th>
-              <th>Dibuat pada</th>
-              <th>Diubah pada</th>
-              <th>Status</th>
-              <th>Tindakan</th>
-            </tr>
 
-            <tr th:each="todo, status : ${todos}">
-              <td th:text="${status.index + 1}"></td>
-              <td th:text="${todo.title}"></td>
-              <td
-                th:text="${#temporals.format(todo.createdAt, 'd MMMM yyyy, HH:mm')}"
-              ></td>
-              <td
-                th:text="${#temporals.format(todo.updatedAt, 'd MMMM yyyy, HH:mm')}"
-              ></td>
-              <td>
-                <span th:if="${todo.finished}" class="badge bg-success"
-                  >Selesai</span
-                >
-                <span th:unless="${todo.finished}" class="badge bg-danger"
-                  >Belum selesai</span
-                >
-              </td>
-              <td>
-                <a
-                  th:href="@{/todos/{todoId}(todoId=${todo.id})}"
-                  class="btn btn-sm btn-info"
-                >
-                  Detail
-                </a>
-                <button
-                  th:id="|editTodoButton_${todo.id}|"
-                  th:attr="onclick=|prepareEditTodo(`${todo.id}`, `${todo.title}`, `${todo.description}`, ${todo.finished})|"
-                  class="btn btn-sm btn-warning"
-                >
-                  Edit
-                </button>
-                <button
-                  th:id="|deleteTodoButton_${todo.id}|"
-                  th:attr="onclick=|prepareDeleteTodo(`${todo.id}`, `${todo.title}`)|"
-                  class="btn btn-sm btn-danger"
-                >
-                  Hapus
-                </button>
-              </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(todos)}">
-              <td colspan="6" class="text-center">
-                Belum ada data todo yang tersedia.
-              </td>
-            </tr>
-          </table>
+  <body>
+    <!-- Konten Utama -->
+    <div layout:fragment="content" class="container py-5">
+      <!-- Header Dashboard -->
+      <div class="row mb-4">
+        <div class="col">
+          <h1 class="display-4">🍎 Dashboard Nutrisi</h1>
+          <p class="lead">
+            Selamat datang, <strong th:text="${auth.name}">User</strong>!
+          </p>
+        </div>
+        <div class="col-auto">
+          <a th:href="@{/foods}" class="btn btn-primary btn-lg">
+            📋 Lihat Semua Makanan
+          </a>
+          <a th:href="@{/foods/statistics}" class="btn btn-success btn-lg">
+            📊 Statistik Nutrisi
+          </a>
         </div>
       </div>
 
-      <!-- Modals -->
-      <div th:replace="~{models/todos/add :: addTodoModal}"></div>
-      <div th:replace="~{models/todos/edit :: editTodoModal}"></div>
-      <div th:replace="~{models/todos/delete :: deleteTodoModal}"></div>
+      <!-- Statistics Cards -->
+      <div class="row g-4 mb-5">
+        <div class="col-md-3">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <h3 class="display-4 text-primary" th:text="${foods.size()}">0</h3>
+              <p class="text-muted mb-0">Total Makanan</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <h3 class="display-4 text-danger" th:text="${statistics.averageNutrition?.get('calories') != null ? #numbers.formatDecimal(statistics.averageNutrition.get('calories'), 0, 0) : '0'}">0</h3>
+              <p class="text-muted mb-0">Rata-rata Kalori</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <h3 class="display-4 text-success" th:text="${statistics.averageNutrition?.get('protein') != null ? #numbers.formatDecimal(statistics.averageNutrition.get('protein'), 0, 1) : '0'}">0</h3>
+              <p class="text-muted mb-0">Rata-rata Protein (g)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card text-center shadow-sm">
+            <div class="card-body">
+              <h3 class="display-4 text-warning" th:text="${statistics.countByCategory?.size() != null ? statistics.countByCategory.size() : '0'}">0</h3>
+              <p class="text-muted mb-0">Kategori Makanan</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Charts -->
+      <div class="row g-4 mb-5">
+        <div class="col-md-6">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">📊 Kalori per Kategori</h5>
+              <canvas id="caloriesByCategoryChart" height="250"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">🍽️ Jumlah Makanan per Kategori</h5>
+              <canvas id="countByCategoryChart" height="250"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Foods -->
+      <div class="row">
+        <div class="col">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>🍽️ Makanan Terbaru</h2>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#addFoodModal"
+            >
+              ➕ Tambah Makanan
+            </button>
+          </div>
+
+          <div class="row g-3">
+            <div
+              th:each="food, iterStat : ${foods}"
+              th:if="${iterStat.index < 8}"
+              class="col-md-3"
+            >
+              <div class="card h-100 shadow-sm">
+                <img
+                  th:if="${food.cover}"
+                  th:src="@{'/foods/cover/' + ${food.cover}}"
+                  class="card-img-top"
+                  th:alt="${food.name}"
+                  style="height: 150px; object-fit: cover"
+                />
+                <img
+                  th:unless="${food.cover}"
+                  src="https://via.placeholder.com/300x150?text=No+Image"
+                  class="card-img-top"
+                  alt="No image"
+                  style="height: 150px; object-fit: cover"
+                />
+                <div class="card-body">
+                  <span
+                    class="badge bg-primary mb-2"
+                    th:text="${food.category}"
+                    >Category</span
+                  >
+                  <h6 class="card-title" th:text="${food.name}">Food Name</h6>
+                  <p class="card-text small text-muted">
+                    🔥 <strong th:text="${food.calories}">0</strong> kcal | 💪
+                    <strong th:text="${food.protein}">0</strong>g
+                  </p>
+                  <a
+                    th:href="@{'/foods/' + ${food.id}}"
+                    class="btn btn-sm btn-outline-primary"
+                  >
+                    Detail
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${foods.empty}" class="col-12">
+              <div class="alert alert-info text-center" role="alert">
+                <h4>🍽️ Belum ada makanan</h4>
+                <p>Mulai tambahkan makanan pertama Anda!</p>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#addFoodModal"
+                >
+                  ➕ Tambah Makanan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Scripts -->
-    <script layout:fragment="others-js">
-      function prepareEditTodo(id, title, description, finished) {
-        /* Set nilai pada form edit */
-        document.getElementById("editTodoId").value = id;
-        document.getElementById("editTodoTitle").value = title;
-        document.getElementById("editTodoDescription").value = description;
-        document.getElementById("editTodoFinished").value = finished
-          ? "1"
-          : "0";
+    <!-- Modal Add Food -->
+    <div th:replace="~{models/foods/add :: modal}"></div>
 
-        /* Tampilkan modal */
-        var editModal = new bootstrap.Modal(
-          document.getElementById("editTodoModal")
-        );
-        editModal.show();
-      }
+    <!-- JavaScript -->
+    <th:block layout:fragment="others-js">
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Data dari server
+        const statistics = /*[[${statistics}]]*/ {};
 
-      function prepareDeleteTodo(id, title) {
-        /* Set nilai pada form delete */
-        document.getElementById("deleteTodoId").value = id;
-        document.getElementById("deleteTodoTitle").innerText = title;
-
-        /* Tampilkan modal */
-        var deleteModal = new bootstrap.Modal(
-          document.getElementById("deleteTodoModal")
-        );
-        deleteModal.show();
-      }
-
-      document.addEventListener("DOMContentLoaded", function () {
-        /* Cek apakah modal add perlu dibuka otomatis */
-        var addTodoModalOpen = "[[${addTodoModalOpen}]]" === "true";
-        if (addTodoModalOpen) {
-          var addModal = new bootstrap.Modal(
-            document.getElementById("addTodoModal")
-          );
-          addModal.show();
+        // Chart 1: Calories by Category (Bar Chart)
+        if (statistics.caloriesByCategory) {
+          const caloriesCtx = document
+            .getElementById("caloriesByCategoryChart")
+            .getContext("2d");
+          new Chart(caloriesCtx, {
+            type: "bar",
+            data: {
+              labels: Object.keys(statistics.caloriesByCategory),
+              datasets: [
+                {
+                  label: "Total Kalori (kcal)",
+                  data: Object.values(statistics.caloriesByCategory),
+                  backgroundColor: [
+                    "rgba(255, 99, 132, 0.7)",
+                    "rgba(54, 162, 235, 0.7)",
+                    "rgba(255, 206, 86, 0.7)",
+                    "rgba(75, 192, 192, 0.7)",
+                    "rgba(153, 102, 255, 0.7)",
+                  ],
+                  borderColor: [
+                    "rgba(255, 99, 132, 1)",
+                    "rgba(54, 162, 235, 1)",
+                    "rgba(255, 206, 86, 1)",
+                    "rgba(75, 192, 192, 1)",
+                    "rgba(153, 102, 255, 1)",
+                  ],
+                  borderWidth: 2,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false,
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                },
+              },
+            },
+          });
         }
 
-        /* Cek apakah modal edit perlu dibuka otomatis */
-        var editTodoModalOpen = "[[${editTodoModalOpen}]]" === "true";
-        if (editTodoModalOpen) {
-          const editTodoModalId = "[[${editTodoModalId}]]";
-          const buttonEdit = document.getElementById(
-            `editTodoButton_${editTodoModalId}`
-          );
-          if (buttonEdit) {
-            buttonEdit.click();
-          }
+        // Chart 2: Count by Category (Doughnut Chart)
+        if (statistics.countByCategory) {
+          const countCtx = document
+            .getElementById("countByCategoryChart")
+            .getContext("2d");
+          new Chart(countCtx, {
+            type: "doughnut",
+            data: {
+              labels: Object.keys(statistics.countByCategory),
+              datasets: [
+                {
+                  label: "Jumlah Makanan",
+                  data: Object.values(statistics.countByCategory),
+                  backgroundColor: [
+                    "rgba(255, 99, 132, 0.7)",
+                    "rgba(54, 162, 235, 0.7)",
+                    "rgba(255, 206, 86, 0.7)",
+                    "rgba(75, 192, 192, 0.7)",
+                    "rgba(153, 102, 255, 0.7)",
+                  ],
+                  borderColor: "#fff",
+                  borderWidth: 2,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: "bottom",
+                },
+              },
+            },
+          });
         }
-
-        /* Cek apakah modal delete perlu dibuka otomatis */
-        var deleteTodoModalOpen = "[[${deleteTodoModalOpen}]]" === "true";
-        if (deleteTodoModalOpen) {
-          const deleteTodoModalId = "[[${deleteTodoModalId}]]";
-          const buttonDelete = document.getElementById(
-            `deleteTodoButton_${deleteTodoModalId}`
-          );
-          if (buttonDelete) {
-            buttonDelete.click();
-          }
-        }
-      });
-    </script>
+        /*]]>*/
+      </script>
+    </th:block>
   </body>
 </html>

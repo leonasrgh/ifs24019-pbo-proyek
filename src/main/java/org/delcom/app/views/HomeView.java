@@ -1,8 +1,8 @@
 package org.delcom.app.views;
 
-import org.delcom.app.dto.TodoForm;
+import org.delcom.app.dto.FoodForm;
 import org.delcom.app.entities.User;
-import org.delcom.app.services.TodoService;
+import org.delcom.app.services.FoodService;
 import org.delcom.app.utils.ConstUtil;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeView {
 
-    private final TodoService todoService;
+    private final FoodService foodService;
 
-    public HomeView(TodoService todoService) {
-        this.todoService = todoService;
+    public HomeView(FoodService foodService) {
+        this.foodService = foodService;
     }
 
     @GetMapping
@@ -35,13 +35,18 @@ public class HomeView {
         User authUser = (User) principal;
         model.addAttribute("auth", authUser);
 
-        // Todos
-        var todos = todoService.getAllTodos(authUser.getId(), "");
-        model.addAttribute("todos", todos);
+        // Foods - semua makanan user
+        var foods = foodService.getAllFoods(authUser.getId(), "");
+        model.addAttribute("foods", foods);
 
-        // Todo Form
-        model.addAttribute("todoForm", new TodoForm());
+        // Statistics untuk dashboard chart
+        var statistics = foodService.getNutritionStatistics(authUser.getId());
+        model.addAttribute("statistics", statistics);
+
+        // Food Form untuk modal add
+        model.addAttribute("foodForm", new FoodForm());
 
         return ConstUtil.TEMPLATE_PAGES_HOME;
     }
 }
+

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <!-- Modal Fragment -->
+    <div th:fragment="modal">
+      <div
+        class="modal fade"
+        id="addFoodModal"
+        tabindex="-1"
+        aria-labelledby="addFoodModalLabel"
+        aria-hidden="true"
+        th:classappend="${addFoodModalOpen} ? 'show d-block' : ''"
+      >
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <form
+              th:action="@{/foods/add}"
+              method="post"
+              th:object="${foodForm}"
+            >
+              <!-- Modal Header -->
+              <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addFoodModalLabel">
+                  ➕ Tambah Makanan Baru
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+
+              <!-- Modal Body -->
+              <div class="modal-body">
+                <div class="row g-3">
+                  <!-- Nama Makanan -->
+                  <div class="col-md-6">
+                    <label for="name" class="form-label"
+                      >Nama Makanan <span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="name"
+                      name="name"
+                      th:field="*{name}"
+                      placeholder="Contoh: Nasi Putih"
+                      required
+                    />
+                  </div>
+
+                  <!-- Kategori -->
+                  <div class="col-md-6">
+                    <label for="category" class="form-label"
+                      >Kategori <span class="text-danger">*</span></label
+                    >
+                    <select
+                      class="form-select"
+                      id="category"
+                      name="category"
+                      th:field="*{category}"
+                      required
+                    >
+                      <option value="">Pilih Kategori</option>
+                      <option value="Buah">🍎 Buah</option>
+                      <option value="Sayuran">🥗 Sayuran</option>
+                      <option value="Protein">🍗 Protein</option>
+                      <option value="Karbohidrat">🍚 Karbohidrat</option>
+                      <option value="Lemak Sehat">🥑 Lemak Sehat</option>
+                    </select>
+                  </div>
+
+                  <!-- Ukuran Porsi -->
+                  <div class="col-md-6">
+                    <label for="servingSize" class="form-label"
+                      >Ukuran Porsi <span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="servingSize"
+                      name="servingSize"
+                      th:field="*{servingSize}"
+                      placeholder="Contoh: 100g, 1 mangkuk, 1 buah"
+                      required
+                    />
+                  </div>
+
+                  <!-- Kalori -->
+                  <div class="col-md-6">
+                    <label for="calories" class="form-label"
+                      >Kalori (kcal) <span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="calories"
+                      name="calories"
+                      th:field="*{calories}"
+                      step="0.1"
+                      min="0"
+                      placeholder="Contoh: 130"
+                      required
+                    />
+                  </div>
+
+                  <!-- Protein -->
+                  <div class="col-md-3">
+                    <label for="protein" class="form-label"
+                      >Protein (g) <span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="protein"
+                      name="protein"
+                      th:field="*{protein}"
+                      step="0.1"
+                      min="0"
+                      placeholder="0"
+                      required
+                    />
+                  </div>
+
+                  <!-- Karbohidrat -->
+                  <div class="col-md-3">
+                    <label for="carbohydrates" class="form-label"
+                      >Karbo (g) <span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="carbohydrates"
+                      name="carbohydrates"
+                      th:field="*{carbohydrates}"
+                      step="0.1"
+                      min="0"
+                      placeholder="0"
+                      required
+                    />
+                  </div>
+
+                  <!-- Lemak -->
+                  <div class="col-md-3">
+                    <label for="fat" class="form-label"
+                      >Lemak (g) <span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="fat"
+                      name="fat"
+                      th:field="*{fat}"
+                      step="0.1"
+                      min="0"
+                      placeholder="0"
+                      required
+                    />
+                  </div>
+
+                  <!-- Serat -->
+                  <div class="col-md-3">
+                    <label for="fiber" class="form-label"
+                      >Serat (g) <span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="fiber"
+                      name="fiber"
+                      th:field="*{fiber}"
+                      step="0.1"
+                      min="0"
+                      placeholder="0"
+                      required
+                    />
+                  </div>
+
+                  <!-- Deskripsi -->
+                  <div class="col-12">
+                    <label for="description" class="form-label"
+                      >Deskripsi (Opsional)</label
+                    >
+                    <textarea
+                      class="form-control"
+                      id="description"
+                      name="description"
+                      th:field="*{description}"
+                      rows="3"
+                      placeholder="Tambahkan deskripsi atau catatan tentang makanan ini..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="alert alert-info mt-3" role="alert">
+                  <small
+                    ><strong>💡 Tips:</strong> Pastikan nilai nutrisi sudah
+                    sesuai dengan ukuran porsi yang Anda masukkan.</small
+                  >
+                </div>
+              </div>
+
+              <!-- Modal Footer -->
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Batal
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  ➕ Tambah Makanan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Script untuk auto-show modal -->
+      <script th:inline="javascript">
+        /*<![CDATA[*/
+        const addModalOpen = /*[[${addFoodModalOpen}]]*/ false;
+        if (addModalOpen) {
+          const addModal = new bootstrap.Modal(
+            document.getElementById("addFoodModal")
+          );
+          addModal.show();
+        }
+        /*]]>*/
+      </script>
+    </div>
+  </body>
+</html>

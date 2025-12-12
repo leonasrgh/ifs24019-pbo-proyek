@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/base}"
+  lang="id"
+>
+  <head>
+    <title th:text="${food.name} + ' - Detail'">Food Detail</title>
+  </head>
+
+  <body>
+    <!-- Konten Utama -->
+    <div layout:fragment="content" class="container py-5">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
+          <li class="breadcrumb-item"><a th:href="@{/foods}">Daftar Makanan</a></li>
+          <li class="breadcrumb-item active" th:text="${food.name}">Detail</li>
+        </ol>
+      </nav>
+
+      <!-- Food Header -->
+      <div class="row mb-4">
+        <div class="col-md-5">
+          <div class="card shadow-sm">
+            <img
+              th:if="${food.cover}"
+              th:src="@{'/foods/cover/' + ${food.cover}}"
+              class="card-img-top"
+              th:alt="${food.name}"
+              style="height: 400px; object-fit: cover"
+            />
+            <img
+              th:unless="${food.cover}"
+              src="https://via.placeholder.com/600x400?text=No+Image"
+              class="card-img-top"
+              alt="No image"
+              style="height: 400px; object-fit: cover"
+            />
+            <div class="card-body text-center">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-toggle="modal"
+                data-bs-target="#editCoverModal"
+              >
+                📷 Upload / Ubah Cover
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-7">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <span class="badge bg-primary mb-2" th:text="${food.category}">Category</span>
+              <h1 class="display-5" th:text="${food.name}">Food Name</h1>
+              <p class="text-muted lead">
+                📏 Ukuran Porsi: <strong th:text="${food.servingSize}">100g</strong>
+              </p>
+              <p class="text-muted" th:text="${food.description}">Description</p>
+
+              <hr />
+
+              <!-- Quick Nutrition -->
+              <div class="row text-center mb-3">
+                <div class="col-3">
+                  <h4 class="text-danger" th:text="${food.calories}">0</h4>
+                  <small class="text-muted">🔥 Kalori</small>
+                </div>
+                <div class="col-3">
+                  <h4 class="text-success" th:text="${food.protein}">0</h4>
+                  <small class="text-muted">💪 Protein</small>
+                </div>
+                <div class="col-3">
+                  <h4 class="text-warning" th:text="${food.carbohydrates}">0</h4>
+                  <small class="text-muted">🍚 Karbo</small>
+                </div>
+                <div class="col-3">
+                  <h4 class="text-info" th:text="${food.fat}">0</h4>
+                  <small class="text-muted">🧈 Lemak</small>
+                </div>
+              </div>
+
+              <hr />
+
+              <!-- Action Buttons -->
+              <div class="d-grid gap-2">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-lg"
+                  data-bs-toggle="modal"
+                  data-bs-target="#editFoodModal"
+                >
+                  ✏️ Edit Makanan
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger btn-lg"
+                  data-bs-toggle="modal"
+                  data-bs-target="#deleteFoodModal"
+                >
+                  🗑️ Hapus Makanan
+                </button>
+              </div>
+
+              <!-- Metadata -->
+              <hr />
+              <small class="text-muted">
+                📅 Ditambahkan:
+                <span
+                  th:text="${#temporals.format(food.createdAt, 'dd MMM yyyy HH:mm')}"
+                  >Date</span
+                >
+              </small>
+              <br />
+              <small class="text-muted">
+                🔄 Terakhir diupdate:
+                <span
+                  th:text="${#temporals.format(food.updatedAt, 'dd MMM yyyy HH:mm')}"
+                  >Date</span
+                >
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nutrition Facts Table -->
+      <div class="row">
+        <div class="col-md-8">
+          <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">📊 Informasi Nutrisi Lengkap</h5>
+            </div>
+            <div class="card-body">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Nutrisi</th>
+                    <th>Jumlah per Porsi</th>
+                    <th>% AKG*</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Kalori</strong></td>
+                    <td><strong th:text="${food.calories} + ' kcal'">0 kcal</strong></td>
+                    <td>
+                      <span
+                        th:text="${#numbers.formatDecimal(food.calories / 2000 * 100, 0, 1)} + '%'"
+                        >0%</span
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Protein</td>
+                    <td th:text="${food.protein} + ' g'">0 g</td>
+                    <td>
+                      <span
+                        th:text="${#numbers.formatDecimal(food.protein / 50 * 100, 0, 1)} + '%'"
+                        >0%</span
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Karbohidrat</td>
+                    <td th:text="${food.carbohydrates} + ' g'">0 g</td>
+                    <td>
+                      <span
+                        th:text="${#numbers.formatDecimal(food.carbohydrates / 300 * 100, 0, 1)} + '%'"
+                        >0%</span
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Lemak</td>
+                    <td th:text="${food.fat} + ' g'">0 g</td>
+                    <td>
+                      <span
+                        th:text="${#numbers.formatDecimal(food.fat / 67 * 100, 0, 1)} + '%'"
+                        >0%</span
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Serat</td>
+                    <td th:text="${food.fiber} + ' g'">0 g</td>
+                    <td>
+                      <span
+                        th:text="${#numbers.formatDecimal(food.fiber / 25 * 100, 0, 1)} + '%'"
+                        >0%</span
+                      >
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <small class="text-muted"
+                >* % Angka Kebutuhan Gizi (AKG) berdasarkan kebutuhan 2000 kalori per
+                hari</small
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Nutrition Chart -->
+        <div class="col-md-4">
+          <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0">🥧 Komposisi Makronutrien</h5>
+            </div>
+            <div class="card-body">
+              <canvas id="macroChart" width="300" height="300"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <div th:replace="~{models/foods/edit :: modal}"></div>
+    <div th:replace="~{models/foods/edit-cover :: modal}"></div>
+    <div th:replace="~{models/foods/delete :: modal}"></div>
+
+    <!-- JavaScript -->
+    <th:block layout:fragment="others-js">
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script th:inline="javascript">
+        /*<![CDATA[*/
+        const food = {
+          protein: /*[[${food.protein}]]*/ 0,
+          carbohydrates: /*[[${food.carbohydrates}]]*/ 0,
+          fat: /*[[${food.fat}]]*/ 0,
+          fiber: /*[[${food.fiber}]]*/ 0,
+        };
+
+        // Create Pie Chart for Macros
+        const ctx = document.getElementById("macroChart").getContext("2d");
+        new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: ["Protein", "Karbohidrat", "Lemak", "Serat"],
+            datasets: [
+              {
+                data: [
+                  food.protein,
+                  food.carbohydrates,
+                  food.fat,
+                  food.fiber,
+                ],
+                backgroundColor: [
+                  "rgba(75, 192, 192, 0.8)",
+                  "rgba(255, 206, 86, 0.8)",
+                  "rgba(255, 99, 132, 0.8)",
+                  "rgba(153, 102, 255, 0.8)",
+                ],
+                borderColor: "#fff",
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+            },
+          },
+        });
+        /*]]>*/
+      </script>
+    </th:block>
+  </body>
+</html>

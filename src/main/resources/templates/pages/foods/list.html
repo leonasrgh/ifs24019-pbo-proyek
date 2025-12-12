@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/base}"
+  lang="id"
+>
+  <head>
+    <title>Daftar Makanan - Nutrition App</title>
+  </head>
+
+  <body>
+    <!-- Konten Utama -->
+    <div layout:fragment="content" class="container py-5">
+      <!-- Header -->
+      <div class="row mb-4">
+        <div class="col">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
+              <li class="breadcrumb-item active">Daftar Makanan</li>
+            </ol>
+          </nav>
+          <h1 class="display-5">📋 Daftar Makanan</h1>
+        </div>
+        <div class="col-auto">
+          <button
+            type="button"
+            class="btn btn-primary btn-lg"
+            data-bs-toggle="modal"
+            data-bs-target="#addFoodModal"
+          >
+            ➕ Tambah Makanan
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Filter -->
+      <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+          <form th:action="@{/foods}" method="get" class="row g-3">
+            <div class="col-md-6">
+              <label for="search" class="form-label">🔍 Cari Makanan</label>
+              <input
+                type="text"
+                class="form-control"
+                id="search"
+                name="search"
+                th:value="${searchQuery}"
+                placeholder="Cari berdasarkan nama atau deskripsi..."
+              />
+            </div>
+
+            <div class="col-md-4">
+              <label for="category" class="form-label">🏷️ Kategori</label>
+              <select class="form-select" id="category" name="category">
+                <option value="">Semua Kategori</option>
+                <option
+                  value="Buah"
+                  th:selected="${selectedCategory == 'Buah'}"
+                >
+                  🍎 Buah
+                </option>
+                <option
+                  value="Sayuran"
+                  th:selected="${selectedCategory == 'Sayuran'}"
+                >
+                  🥗 Sayuran
+                </option>
+                <option
+                  value="Protein"
+                  th:selected="${selectedCategory == 'Protein'}"
+                >
+                  🍗 Protein
+                </option>
+                <option
+                  value="Karbohidrat"
+                  th:selected="${selectedCategory == 'Karbohidrat'}"
+                >
+                  🍚 Karbohidrat
+                </option>
+                <option
+                  value="Lemak Sehat"
+                  th:selected="${selectedCategory == 'Lemak Sehat'}"
+                >
+                  🥑 Lemak Sehat
+                </option>
+              </select>
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-success w-100 me-2">
+                Cari
+              </button>
+              <a th:href="@{/foods}" class="btn btn-secondary">Reset</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Food Grid -->
+      <div class="row g-4">
+        <div th:each="food : ${foods}" class="col-md-3">
+          <div class="card h-100 shadow-sm">
+            <!-- Cover Image -->
+            <div class="position-relative">
+              <img
+                th:if="${food.cover}"
+                th:src="@{'/foods/cover/' + ${food.cover}}"
+                class="card-img-top"
+                th:alt="${food.name}"
+                style="height: 200px; object-fit: cover"
+              />
+              <img
+                th:unless="${food.cover}"
+                src="https://via.placeholder.com/300x200?text=No+Image"
+                class="card-img-top"
+                alt="No image"
+                style="height: 200px; object-fit: cover"
+              />
+              <span
+                class="badge bg-primary position-absolute top-0 end-0 m-2"
+                th:text="${food.category}"
+                >Category</span
+              >
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body">
+              <h5 class="card-title" th:text="${food.name}">Food Name</h5>
+              <p
+                class="card-text small text-muted"
+                th:text="${food.description}"
+              >
+                Description
+              </p>
+
+              <!-- Nutrition Quick Info -->
+              <div class="d-flex justify-content-between mb-3">
+                <small class="text-muted">
+                  🔥 <strong th:text="${food.calories}">0</strong> kcal
+                </small>
+                <small class="text-muted">
+                  💪 <strong th:text="${food.protein}">0</strong>g protein
+                </small>
+              </div>
+
+              <div class="d-flex justify-content-between mb-2">
+                <small class="text-muted">
+                  🍚 <strong th:text="${food.carbohydrates}">0</strong>g karbo
+                </small>
+                <small class="text-muted">
+                  🧈 <strong th:text="${food.fat}">0</strong>g lemak
+                </small>
+              </div>
+
+              <!-- Action Button -->
+              <a
+                th:href="@{'/foods/' + ${food.id}}"
+                class="btn btn-primary w-100"
+              >
+                👁️ Lihat Detail
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${foods.empty}" class="col-12">
+          <div class="alert alert-info text-center" role="alert">
+            <h4>🍽️ Tidak ada makanan ditemukan</h4>
+            <p th:if="${searchQuery != null && !searchQuery.isEmpty()}">
+              Tidak ada hasil untuk "<strong th:text="${searchQuery}"></strong>"
+            </p>
+            <p th:if="${selectedCategory != null && !selectedCategory.isEmpty()}">
+              Tidak ada makanan dalam kategori
+              "<strong th:text="${selectedCategory}"></strong>"
+            </p>
+            <p>Coba kata kunci atau filter lain, atau tambahkan makanan baru!</p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#addFoodModal"
+            >
+              ➕ Tambah Makanan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Add Food -->
+    <div th:replace="~{models/foods/add :: modal}"></div>
+  </body>
+</html>
