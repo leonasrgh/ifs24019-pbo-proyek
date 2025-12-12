@@ -4,7 +4,7 @@ spring.application.name=IFS24019-PBO-PROYEK
 # DATABASE CONFIGURATION
 # ==========================================
 # Ganti 'db_pbo_app' menjadi 'db_pbo_proyek' sesuai kesepakatan
-spring.datasource.url=jdbc:postgresql://localhost:5432/db_pbo_proyek
+spring.datasource.url=jdbc:postgresql://localhost:5432/mycookbook_db
 spring.datasource.username=postgres
 spring.datasource.password=postgres
 spring.datasource.driver-class-name=org.postgresql.Driver
