@@ -4,7 +4,7 @@ import java.util.UUID;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.constraints.NotNull;
 
-public class CoverRecipeForm {
+public class CoverTodoForm {
 
     private UUID id;
 
@@ -12,7 +12,7 @@ public class CoverRecipeForm {
     private MultipartFile coverFile;
 
     // Constructor
-    public CoverRecipeForm() {
+    public CoverTodoForm() {
     }
 
     // Getters and Setters
@@ -50,9 +50,9 @@ public class CoverRecipeForm {
         String contentType = coverFile.getContentType();
         return contentType != null &&
                 (contentType.equals("image/jpeg") ||
-                 contentType.equals("image/png") ||
-                 contentType.equals("image/gif") ||
-                 contentType.equals("image/webp"));
+                        contentType.equals("image/png") ||
+                        contentType.equals("image/gif") ||
+                        contentType.equals("image/webp"));
     }
 
     public boolean isSizeValid(long maxSize) {

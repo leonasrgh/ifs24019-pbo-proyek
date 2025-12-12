@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -31,90 +30,76 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
-        
-        // 1. Cek Apakah ini Endpoint Public? (Opsional, jika sudah dihandle WebMvcConfig)
-        // Kita biarkan WebMvcConfig yang mengatur exclude path, tapi pengecekan ganda tidak masalah.
-        
-        // 2. Ekstrak Token (Cari di Header DULU, kalau tidak ada cari di COOKIE)
-        String token = extractToken(request);
+        // Skip auth untuk endpoint public
+        if (isPublicEndpoint(request)) {
+            return true;
+        }
 
-        // 3. Validasi Keberadaan Token
+        // Ambil bearer token dari header
+        String rawAuthToken = request.getHeader("Authorization");
+        String token = extractToken(rawAuthToken);
+
+        // Validasi token
         if (token == null || token.isEmpty()) {
-            handleError(request, response, 401, "Token tidak ditemukan");
+            sendErrorResponse(response, 401, "Token autentikasi tidak ditemukan");
             return false;
         }
 
-        // 4. Validasi Format JWT
+        // Validasi format token JWT
         if (!JwtUtil.validateToken(token, true)) {
-            handleError(request, response, 401, "Token tidak valid atau kadaluarsa");
+            sendErrorResponse(response, 401, "Token autentikasi tidak valid");
             return false;
         }
 
-        // 5. Ekstrak UserId
+        // Ekstrak userId dari token
         UUID userId = JwtUtil.extractUserId(token);
         if (userId == null) {
-            handleError(request, response, 401, "Format token salah");
+            sendErrorResponse(response, 401, "Format token autentikasi tidak valid");
             return false;
         }
 
-        // 6. Cek Database (Apakah token valid dan user masih ada?)
+        // Cari token di database
         AuthToken authToken = authTokenService.findUserToken(userId, token);
         if (authToken == null) {
-            handleError(request, response, 401, "Sesi login tidak ditemukan di database");
+            sendErrorResponse(response, 401, "Token autentikasi sudah expired");
             return false;
         }
 
+        // Ambil data user
         User authUser = userService.getUserById(authToken.getUserId());
         if (authUser == null) {
-            handleError(request, response, 404, "User tidak ditemukan");
+            sendErrorResponse(response, 404, "User tidak ditemukan");
             return false;
         }
 
-        // 7. Simpan User ke Context (Agar bisa dipanggil di Controller)
+        // Set user ke auth context
         authContext.setAuthUser(authUser);
         return true;
     }
 
-    // ========================================================================
-    // HELPER METHODS
-    // ========================================================================
-
-    private String extractToken(HttpServletRequest request) {
-        // A. Cek Header (Untuk Postman / API calls)
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-
-        // B. Cek Cookie (PENTING UNTUK THYMELEAF / BROWSER)
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if ("AUTH_TOKEN".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
+    private String extractToken(String rawAuthToken) {
+        if (rawAuthToken != null && rawAuthToken.startsWith("Bearer ")) {
+            return rawAuthToken.substring(7); // hapus "Bearer "
         }
         return null;
     }
 
-    private void handleError(HttpServletRequest request, HttpServletResponse response, int status, String message) throws Exception {
-        String uri = request.getRequestURI();
-        
-        // Jika request berasal dari Browser (ingin buka halaman HTML), lakukan REDIRECT ke Login
-        // Cek jika URL tidak diawali /api (berarti halaman web biasa)
-        if (!uri.startsWith("/api")) {
-            response.sendRedirect("/auth/login?error=" + message);
-        } else {
-            // Jika request adalah API (Postman/AJAX), kirim JSON Error
-            sendJsonError(response, status, message);
-        }
+    private boolean isPublicEndpoint(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        // String method = request.getMethod();
+
+        // Endpoint public yang tidak perlu auth
+        return path.startsWith("/api/auth") || path.equals("/error");
     }
 
-    private void sendJsonError(HttpServletResponse response, int status, String message) throws Exception {
+    private void sendErrorResponse(HttpServletResponse response, int status, String message) throws Exception {
         response.setStatus(status);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        String jsonResponse = String.format("{\"status\":\"fail\",\"message\":\"%s\",\"data\":null}", message);
+
+        String jsonResponse = String.format(
+                "{\"status\":\"fail\",\"message\":\"%s\",\"data\":null}",
+                message);
         response.getWriter().write(jsonResponse);
     }
 }

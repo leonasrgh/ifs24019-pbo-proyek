@@ -14,7 +14,7 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: db_pbo_proyek
+          POSTGRES_DB: mycookbook_db
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:

@@ -5,7 +5,7 @@
   layout:decorate="~{layouts/base}"
 >
   <head>
-    <title>Daftar - Aplikasi Resep</title>
+    <title>Daftar - Spring Boot Todolist</title>
   </head>
   <body>
     <div layout:fragment="content" class="mt-5">
@@ -14,18 +14,24 @@
         method="post"
         th:object="${registerForm}"
       >
-        <div class="card mx-auto shadow-sm" style="max-width: 400px">
-          <div class="card-body p-4">
+        <div class="card mx-auto" style="max-width: 360px">
+          <div class="card-body">
             <div>
-              <div class="text-center mb-4">
-                <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
-                
-                <h4 class="fw-bold">Buat Akun Baru</h4>
-                <span class="text-muted small">
-                  Bergabunglah untuk menyimpan resep favorit Anda
+              <div class="text-center">
+                <img
+                  th:src="@{/assets/images/logo.png}"
+                  alt="Logo"
+                  width="64"
+                />
+                <hr />
+                <h5>Daftar</h5>
+                <span class="text-muted">
+                  Lengkapi form pendaftaran berikut untuk membuat akun baru
                 </span>
+                <hr />
               </div>
 
+              <!-- Pesan Error Global -->
               <div
                 th:if="${#fields.hasGlobalErrors()}"
                 class="alert alert-danger"
@@ -36,15 +42,15 @@
                 ></th:block>
               </div>
 
+              <!-- Nama -->
               <div class="form-group mb-3">
-                <label for="inputName" class="form-label fw-bold small">Nama Lengkap</label>
+                <label for="inputName">Nama Lengkap</label>
                 <input
                   type="text"
                   class="form-control"
                   id="inputName"
                   th:field="*{name}"
                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
-                  placeholder="Nama Anda"
                 />
                 <div
                   th:if="${#fields.hasErrors('name')}"
@@ -57,15 +63,15 @@
                 </div>
               </div>
 
+              <!-- Alamat Email -->
               <div class="form-group mb-3">
-                <label for="inputEmail" class="form-label fw-bold small">Email</label>
+                <label for="inputEmail">Email</label>
                 <input
                   type="email"
                   class="form-control"
                   id="inputEmail"
                   th:field="*{email}"
                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
-                  placeholder="nama@email.com"
                 />
                 <div
                   th:if="${#fields.hasErrors('email')}"
@@ -78,15 +84,15 @@
                 </div>
               </div>
 
-              <div class="form-group mb-4">
-                <label for="inputPassword" class="form-label fw-bold small">Kata Sandi</label>
+              <!-- Kata Sandi -->
+              <div class="form-group mb-3">
+                <label for="inputPassword">Kata Sandi</label>
                 <input
                   type="password"
                   class="form-control"
                   id="inputPassword"
                   th:field="*{password}"
                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
-                  placeholder="******"
                 />
                 <div
                   th:if="${#fields.hasErrors('password')}"
@@ -99,18 +105,18 @@
                 </div>
               </div>
 
-              <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary fw-bold">
-                  Daftar Sekarang
+              <!-- Tombol Masuk -->
+              <div class="form-group mt-3 text-end">
+                <button type="submit" class="btn btn-primary btn-block">
+                  Masuk
                 </button>
               </div>
 
-              <hr class="my-4" />
-              
-              <div class="text-center">
-                <span class="text-muted">Sudah memiliki akun?</span>
-                <a th:href="@{/auth/login}" class="text-decoration-none fw-bold">Masuk di sini</a>
-              </div>
+              <hr />
+              <p class="text-center">
+                Sudah memiliki akun?
+                <a th:href="@{/auth/login}">Masuk</a>
+              </p>
             </div>
           </div>
         </div>

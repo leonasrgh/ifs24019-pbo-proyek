@@ -1,67 +1,52 @@
 package org.delcom.app.entities;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "recipes")
-public class Recipe {
+@Table(name = "todos")
+public class Todo {
 
-    // ==========================================
-    // 8 ATRIBUT WAJIB (AGAR NILAI MAKSIMAL)
-    // ==========================================
-
-    // 1. ID (Wajib)
     @Id
     @GeneratedValue(generator = "UUID")
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID id;
 
-    // 2. User ID (Wajib - Relasi ke User)
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    // 3. Judul Resep
     @Column(name = "title", nullable = false)
     private String title;
 
-    // 4. Deskripsi / Cara Masak (Pakai TEXT agar muat banyak)
-    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "description", nullable = false)
     private String description;
 
-    // 5. Bahan-bahan (Pakai TEXT agar muat banyak)
-    @Column(name = "ingredients", nullable = false, columnDefinition = "TEXT")
-    private String ingredients;
+    @Column(name = "is_finished", nullable = false, columnDefinition = "boolean default false")
+    private Boolean isFinished = false;
 
-    // 6. Path Gambar Cover (Untuk fitur Ubah Gambar)
     @Column(name = "cover", nullable = true)
     private String cover;
 
-    // 7. Created At (Wajib)
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // 8. Updated At (Wajib)
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // ==========================================
-    // CONSTRUCTORS
-    // ==========================================
-    public Recipe() {
+    // Constructor, getter, setter
+    public Todo() {
     }
 
-    public Recipe(UUID userId, String title, String description, String ingredients) {
+    public Todo(UUID userId, String title, String description, Boolean isFinished) {
         this.userId = userId;
         this.title = title;
         this.description = description;
-        this.ingredients = ingredients;
+        this.isFinished = isFinished;
     }
 
-    // ==========================================
-    // GETTERS & SETTERS
-    // ==========================================
+    // Getter & Setter
     public UUID getId() {
         return id;
     }
@@ -94,12 +79,12 @@ public class Recipe {
         this.description = description;
     }
 
-    public String getIngredients() {
-        return ingredients;
+    public Boolean isFinished() {
+        return isFinished;
     }
 
-    public void setIngredients(String ingredients) {
-        this.ingredients = ingredients;
+    public void setFinished(Boolean finished) {
+        isFinished = finished;
     }
 
     public String getCover() {
@@ -118,9 +103,7 @@ public class Recipe {
         return updatedAt;
     }
 
-    // ==========================================
-    // LIFECYCLE CALLBACKS
-    // ==========================================
+    // ======= @PrePersist & @PreUpdate =======
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

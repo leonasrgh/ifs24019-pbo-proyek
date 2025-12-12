@@ -5,14 +5,14 @@
   layout:decorate="~{layouts/base}"
 >
   <head>
-    <title>Daftar - Aplikasi Resep</title>
+    <title>Masuk - Spring Boot Todolist</title>
   </head>
   <body>
     <div layout:fragment="content" class="mt-5">
       <form
-        th:action="@{/auth/register/post}"
+        th:action="@{/auth/login/post}"
         method="post"
-        th:object="${registerForm}"
+        th:object="${loginForm}"
       >
         <div class="card mx-auto" style="max-width: 360px">
           <div class="card-body">
@@ -22,18 +22,16 @@
                   th:src="@{/assets/images/logo.png}"
                   alt="Logo"
                   width="64"
-                  th:if="${#themes.code('logo') != null}" 
                 />
-                <i class="fas fa-utensils fa-3x text-primary mb-3" th:if="${#themes.code('logo') == null}"></i>
-                
                 <hr />
-                <h5>Daftar Akun Baru</h5>
+                <h5>Masuk</h5>
                 <span class="text-muted">
-                  Lengkapi data berikut untuk membuat akun
+                  Masuk menggunakan kredensial akun Anda untuk melanjutkan
                 </span>
                 <hr />
               </div>
 
+              <!-- Pesan Error Global -->
               <div
                 th:if="${#fields.hasGlobalErrors()}"
                 class="alert alert-danger"
@@ -44,27 +42,7 @@
                 ></th:block>
               </div>
 
-              <div class="form-group mb-3">
-                <label for="inputName">Nama Lengkap</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="inputName"
-                  th:field="*{name}"
-                  th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
-                  placeholder="Nama Anda"
-                />
-                <div
-                  th:if="${#fields.hasErrors('name')}"
-                  class="invalid-feedback"
-                >
-                  <th:block
-                    th:each="err : ${#fields.errors('name')}"
-                    th:text="${err}"
-                  ></th:block>
-                </div>
-              </div>
-
+              <!-- Alamat Email -->
               <div class="form-group mb-3">
                 <label for="inputEmail">Email</label>
                 <input
@@ -73,7 +51,6 @@
                   id="inputEmail"
                   th:field="*{email}"
                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
-                  placeholder="nama@email.com"
                   autocomplete="email"
                 />
                 <div
@@ -87,6 +64,7 @@
                 </div>
               </div>
 
+              <!-- Kata Sandi -->
               <div class="form-group mb-3">
                 <label for="inputPassword">Kata Sandi</label>
                 <input
@@ -95,8 +73,7 @@
                   id="inputPassword"
                   th:field="*{password}"
                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
-                  placeholder="******"
-                  autocomplete="new-password"
+                  autocomplete="current-password"
                 />
                 <div
                   th:if="${#fields.hasErrors('password')}"
@@ -109,16 +86,30 @@
                 </div>
               </div>
 
-              <div class="form-group mt-4 text-end">
-                <button type="submit" class="btn btn-success btn-block w-100">
-                  Daftar Sekarang
+              <!-- Remember Me -->
+              <div class="form-group mb-3 form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="optionRememberMe"
+                  th:field="*{rememberMe}"
+                />
+                <label class="form-check-label" for="optionRememberMe"
+                  >Ingat saya</label
+                >
+              </div>
+
+              <!-- Tombol Masuk -->
+              <div class="form-group mt-3 text-end">
+                <button type="submit" class="btn btn-primary btn-block">
+                  Masuk
                 </button>
               </div>
 
               <hr />
               <p class="text-center">
-                Sudah memiliki akun?
-                <a th:href="@{/auth/login}">Masuk disini</a>
+                Belum memiliki akun?
+                <a th:href="@{/auth/register}">Daftar</a>
               </p>
             </div>
           </div>

@@ -1,15 +1,15 @@
-<div th:fragment="editCoverModal">
+<div th:fragment="editCoverTodoModal">
   <form
-    th:action="@{/recipes/edit-cover}"
+    th:action="@{/todos/edit-cover}"
     method="post"
-    th:object="${coverRecipeForm}"
+    th:object="${coverTodoForm}"
     enctype="multipart/form-data"
   >
-    <div class="modal fade" id="editCoverModal" tabindex="-1">
+    <div class="modal fade" id="editCoverTodoModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Ubah Foto Cover</h5>
+            <h5 class="modal-title">Ubah Cover Todo</h5>
             <button
               type="button"
               class="btn-close"
@@ -18,27 +18,20 @@
           </div>
 
           <div class="modal-body">
+            <!-- Hidden ID Todo -->
             <input type="hidden" th:field="*{id}" />
 
             <div class="mb-3">
-              <label for="editCoverRecipeFile" class="form-label fw-bold">
-                Pilih Gambar Baru
-              </label>
-              
-              <div class="alert alert-info small py-2 mb-2">
-                <i class="fas fa-info-circle me-1"></i> Format: JPG, PNG, GIF. Maks: 5MB.
-              </div>
-
+              <label class="form-label">Pilih Cover</label>
               <input
                 type="file"
                 class="form-control"
                 th:field="*{coverFile}"
-                id="editCoverRecipeFile"
-                accept="image/*"
+                id="editCoverTodoFile"
               />
 
               <div
-                class="text-danger small mt-1"
+                class="text-danger"
                 th:if="${#fields.hasErrors('coverFile')}"
                 th:errors="*{coverFile}"
               ></div>
@@ -54,8 +47,8 @@
               Batal
             </button>
 
-            <button type="submit" class="btn btn-primary fw-bold">
-              <i class="fas fa-upload me-1"></i> Upload Foto
+            <button type="submit" class="btn btn-primary" id="btnSaveCover">
+              Simpan
             </button>
           </div>
         </div>
