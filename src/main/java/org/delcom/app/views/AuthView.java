@@ -1,3 +1,5 @@
+// Lokasi file: src/main/java/org/delcom/app/views/AuthView.java
+
 package org.delcom.app.views;
 
 import java.util.List;
@@ -31,7 +33,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
 @Controller
-@RequestMapping("/auth")
+@RequestMapping("/auth") // Base path: /auth
 public class AuthView {
 
     private final UserService userService;
@@ -40,7 +42,8 @@ public class AuthView {
         this.userService = userService;
     }
 
-    @GetMapping("/login")
+    // Final path: /auth/login. Tidak ada lagi konflik.
+    @GetMapping("/login") 
     public String showLogin(Model model, HttpSession session) {
         // Cek apakah sudah login
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -84,7 +87,9 @@ public class AuthView {
                 new SimpleGrantedAuthority("ROLE_USER"));
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                existingUser,
+                // PERBAIKAN KRITIS: Ganti 'existingUser' (entitas non-Serializable) 
+                // dengan String (email) sebagai Principal.
+                existingUser.getEmail(), 
                 null,
                 authorities);
 

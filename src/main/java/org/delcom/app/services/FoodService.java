@@ -107,7 +107,12 @@ public class FoodService {
         List<Object[]> caloriesByCategory = foodRepository.getTotalCaloriesByCategory(userId);
         Map<String, Double> caloriesMap = new HashMap<>();
         for (Object[] result : caloriesByCategory) {
-            caloriesMap.put((String) result[0], (Double) result[1]);
+            // PERBAIKAN: Gunakan Number.doubleValue() untuk menghindari ClassCastException
+            if (result[0] instanceof String && result[1] instanceof Number) {
+                caloriesMap.put((String) result[0], ((Number) result[1]).doubleValue());
+            } else {
+                 // Handle kasus jika data tidak sesuai yang diharapkan (misalnya log error)
+            }
         }
         statistics.put("caloriesByCategory", caloriesMap);
 
@@ -115,10 +120,19 @@ public class FoodService {
         List<Object[]> avgNutrition = foodRepository.getAverageNutrition(userId);
         if (!avgNutrition.isEmpty() && avgNutrition.get(0)[0] != null) {
             Map<String, Double> avgMap = new HashMap<>();
-            avgMap.put("protein", (Double) avgNutrition.get(0)[0]);
-            avgMap.put("carbohydrates", (Double) avgNutrition.get(0)[1]);
-            avgMap.put("fat", (Double) avgNutrition.get(0)[2]);
-            avgMap.put("fiber", (Double) avgNutrition.get(0)[3]);
+            // PERBAIKAN: Gunakan Number.doubleValue() untuk menghindari ClassCastException
+            if (avgNutrition.get(0)[0] instanceof Number) {
+                avgMap.put("protein", ((Number) avgNutrition.get(0)[0]).doubleValue());
+            }
+            if (avgNutrition.get(0)[1] instanceof Number) {
+                avgMap.put("carbohydrates", ((Number) avgNutrition.get(0)[1]).doubleValue());
+            }
+            if (avgNutrition.get(0)[2] instanceof Number) {
+                avgMap.put("fat", ((Number) avgNutrition.get(0)[2]).doubleValue());
+            }
+            if (avgNutrition.get(0)[3] instanceof Number) {
+                avgMap.put("fiber", ((Number) avgNutrition.get(0)[3]).doubleValue());
+            }
             statistics.put("averageNutrition", avgMap);
         }
 
@@ -126,7 +140,12 @@ public class FoodService {
         List<Object[]> countByCategory = foodRepository.getCountByCategory(userId);
         Map<String, Long> countMap = new HashMap<>();
         for (Object[] result : countByCategory) {
-            countMap.put((String) result[0], (Long) result[1]);
+            // PERBAIKAN: Gunakan Number.longValue() untuk menghindari ClassCastException
+            if (result[0] instanceof String && result[1] instanceof Number) {
+                countMap.put((String) result[0], ((Number) result[1]).longValue());
+            } else {
+                 // Handle kasus jika data tidak sesuai yang diharapkan
+            }
         }
         statistics.put("countByCategory", countMap);
 

@@ -139,6 +139,26 @@ public class FoodController {
         ));
     }
 
+     // Mendapatkan statistik nutrisi untuk chart
+    // -------------------------------
+    @GetMapping("/statistics")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getNutritionStatistics() {
+        // Validasi autentikasi
+        if (!authContext.isAuthenticated()) {
+            return ResponseEntity.status(403).body(
+                new ApiResponse<>("fail", "User tidak terautentikasi", null));
+        }
+        User authUser = authContext.getAuthUser();
+
+        Map<String, Object> statistics = foodService.getNutritionStatistics(authUser.getId());
+
+        return ResponseEntity.ok(new ApiResponse<>(
+            "success",
+            "Statistik nutrisi berhasil diambil",
+            statistics
+        ));
+    }
+    
     // Mendapatkan food berdasarkan ID
     // -------------------------------
     @GetMapping("/{id}")
@@ -261,25 +281,7 @@ public class FoodController {
         ));
     }
 
-    // Mendapatkan statistik nutrisi untuk chart
-    // -------------------------------
-    @GetMapping("/statistics")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> getNutritionStatistics() {
-        // Validasi autentikasi
-        if (!authContext.isAuthenticated()) {
-            return ResponseEntity.status(403).body(
-                new ApiResponse<>("fail", "User tidak terautentikasi", null));
-        }
-        User authUser = authContext.getAuthUser();
-
-        Map<String, Object> statistics = foodService.getNutritionStatistics(authUser.getId());
-
-        return ResponseEntity.ok(new ApiResponse<>(
-            "success",
-            "Statistik nutrisi berhasil diambil",
-            statistics
-        ));
-    }
+   
 
     // Upload/Update Food Cover
     // -------------------------------

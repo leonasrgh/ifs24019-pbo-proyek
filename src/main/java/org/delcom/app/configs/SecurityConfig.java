@@ -15,16 +15,24 @@ public class SecurityConfig {
         SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                 http
                                 .exceptionHandling(ex -> ex
+                                                // Mengembalikan Entry Point: Jika user mengakses URL terproteksi, 
+                                                // redirect ke /auth/login.
                                                 .authenticationEntryPoint((req, res, e) -> {
                                                         res.sendRedirect("/auth/login");
                                                 }))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/auth/**", "/assets/**", "/api/**",
                                                                 "/css/**", "/js/**")
-                                                .permitAll()
-                                                .anyRequest().authenticated())
+                                                .permitAll() // Semua URL Auth, Asset, API Auth diizinkan
+                                                .anyRequest().authenticated()) // Semua yang lain wajib autentikasi
 
-                                .formLogin(form -> form.disable())
+                                // PERBAIKAN: Aktifkan formLogin untuk mengatur sukses redirect
+                                .formLogin(form -> form 
+                                                .loginPage("/auth/login") // Halaman yang menampilkan form login (GET)
+                                                .loginProcessingUrl("/auth/login") // URL untuk submit kredensial (POST)
+                                                .defaultSuccessUrl("/home", true) // <--- PENGALIHAN SUKSES KE /home
+                                                .permitAll() // Pastikan /auth/login diizinkan
+                                )
                                 .logout(logout -> logout
                                                 .logoutSuccessUrl("/auth/login")
                                                 .permitAll())

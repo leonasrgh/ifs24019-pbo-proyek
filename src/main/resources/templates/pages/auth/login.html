@@ -2,119 +2,257 @@
 <html
   xmlns:th="http://www.thymeleaf.org"
   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{layouts/base}"
+  lang="id"
 >
   <head>
-    <title>Masuk - Spring Boot Todolist</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    
+    <!-- Icon -->
+    <link rel="icon" th:href="@{/assets/images/logo.png}" type="image/x-icon" />
+    
+    <title>Login - MyCookbook</title>
+    
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/vendor/bootstrap-5.3.8-dist/css/bootstrap.min.css}"
+    />
+    
+    <!-- SweetAlert2 -->
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/vendor/sweetalert2/dist/sweetalert2.min.css}"
+    />
+    
+    <style>
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      
+      .login-container {
+        max-width: 450px;
+        width: 100%;
+        padding: 15px;
+      }
+      
+      .login-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+      
+      .login-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+      }
+      
+      .login-header h1 {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+      
+      .login-header p {
+        margin: 0;
+        opacity: 0.9;
+      }
+      
+      .login-body {
+        padding: 2rem;
+      }
+      
+      .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e9ecef;
+      }
+      
+      .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+      }
+      
+      .btn-login {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-weight: 600;
+        color: white;
+        width: 100%;
+        transition: transform 0.2s;
+      }
+      
+      .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+      
+      .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+      }
+      
+      .register-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+      }
+      
+      .register-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      
+      .register-link a:hover {
+        text-decoration: underline;
+      }
+      
+      .emoji-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+    </style>
   </head>
+  
   <body>
-    <div layout:fragment="content" class="mt-5">
-      <form
-        th:action="@{/auth/login/post}"
-        method="post"
-        th:object="${loginForm}"
-      >
-        <div class="card mx-auto" style="max-width: 360px">
-          <div class="card-body">
-            <div>
-              <div class="text-center">
-                <img
-                  th:src="@{/assets/images/logo.png}"
-                  alt="Logo"
-                  width="64"
-                />
-                <hr />
-                <h5>Masuk</h5>
-                <span class="text-muted">
-                  Masuk menggunakan kredensial akun Anda untuk melanjutkan
-                </span>
-                <hr />
-              </div>
-
-              <!-- Pesan Error Global -->
-              <div
-                th:if="${#fields.hasGlobalErrors()}"
-                class="alert alert-danger"
-              >
-                <th:block
-                  th:each="err : ${#fields.globalErrors()}"
-                  th:text="${err}"
-                ></th:block>
-              </div>
-
-              <!-- Alamat Email -->
-              <div class="form-group mb-3">
-                <label for="inputEmail">Email</label>
-                <input
-                  type="email"
-                  class="form-control"
-                  id="inputEmail"
-                  th:field="*{email}"
-                  th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
-                  autocomplete="email"
-                />
-                <div
-                  th:if="${#fields.hasErrors('email')}"
-                  class="invalid-feedback"
-                >
-                  <th:block
-                    th:each="err : ${#fields.errors('email')}"
-                    th:text="${err}"
-                  ></th:block>
-                </div>
-              </div>
-
-              <!-- Kata Sandi -->
-              <div class="form-group mb-3">
-                <label for="inputPassword">Kata Sandi</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  id="inputPassword"
-                  th:field="*{password}"
-                  th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
-                  autocomplete="current-password"
-                />
-                <div
-                  th:if="${#fields.hasErrors('password')}"
-                  class="invalid-feedback"
-                >
-                  <th:block
-                    th:each="err : ${#fields.errors('password')}"
-                    th:text="${err}"
-                  ></th:block>
-                </div>
-              </div>
-
-              <!-- Remember Me -->
-              <div class="form-group mb-3 form-check">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  id="optionRememberMe"
-                  th:field="*{rememberMe}"
-                />
-                <label class="form-check-label" for="optionRememberMe"
-                  >Ingat saya</label
-                >
-              </div>
-
-              <!-- Tombol Masuk -->
-              <div class="form-group mt-3 text-end">
-                <button type="submit" class="btn btn-primary btn-block">
-                  Masuk
-                </button>
-              </div>
-
-              <hr />
-              <p class="text-center">
-                Belum memiliki akun?
-                <a th:href="@{/auth/register}">Daftar</a>
-              </p>
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="emoji-icon">🍎</div>
+          <h1>MyCookbook</h1>
+          <p>Sistem Informasi Nutrisi Makanan</p>
+        </div>
+        
+        <div class="login-body">
+          <h3 class="text-center mb-4">Masuk ke Akun Anda</h3>
+          
+          <!-- Error Message -->
+          <div th:if="${error}" class="alert alert-danger" role="alert">
+            <strong>❌ Login Gagal!</strong><br/>
+            <span th:text="${error}">Error message</span>
+          </div>
+          
+          <!-- Success Message -->
+          <div th:if="${success}" class="alert alert-success" role="alert">
+            <strong>✅ Berhasil!</strong><br/>
+            <span th:text="${success}">Success message</span>
+          </div>
+          
+          <!-- Login Form -->
+          <form th:action="@{/auth/login/post}" method="post"> <!-- PERBAIKAN DI SINI -->
+            <!-- Email -->
+            <div class="mb-3">
+              <label for="email" class="form-label">📧 Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                placeholder="contoh@email.com"
+                required
+                autofocus
+              />
             </div>
+            
+            <!-- Password -->
+            <div class="mb-3">
+              <label for="password" class="form-label">🔒 Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                placeholder="Masukkan password"
+                required
+              />
+            </div>
+            
+            <!-- Remember Me -->
+            <div class="mb-3 form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="remember"
+                name="remember"
+              />
+              <label class="form-check-label" for="remember">
+                Ingat saya
+              </label>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-login">
+              🚀 Masuk
+            </button>
+          </form>
+          
+          <!-- Register Link -->
+          <div class="register-link">
+            <p class="text-muted mb-0">
+              Belum punya akun?
+              <a th:href="@{/auth/register}">Daftar sekarang</a>
+            </p>
           </div>
         </div>
-      </form>
+      </div>
+      
+      <!-- Footer -->
+      <div class="text-center mt-4 text-white">
+        <p class="mb-0">
+          <small>Proyek Akhir PBO &copy; 2025 | IFS24019</small>
+        </p>
+      </div>
     </div>
+    
+    <!-- Bootstrap JS -->
+    <script
+      th:src="@{/assets/vendor/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js}"
+    ></script>
+    
+    <!-- SweetAlert2 -->
+    <script
+      th:src="@{/assets/vendor/sweetalert2/dist/sweetalert2.all.min.js}"
+    ></script>
+    
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Show error with SweetAlert if exists
+        const errorMsg = "[[${error}]]";
+        if (errorMsg && errorMsg.length > 5) {
+          Swal.fire({
+            icon: "error",
+            title: "Login Gagal",
+            text: errorMsg,
+            confirmButtonColor: "#667eea",
+          });
+        }
+        
+        // Show success with SweetAlert if exists
+        const successMsg = "[[${success}]]";
+        if (successMsg && successMsg.length > 5) {
+          Swal.fire({
+            icon: "success",
+            title: "Berhasil!",
+            text: successMsg,
+            confirmButtonColor: "#667eea",
+            timer: 2000
+          });
+        }
+      });
+    </script>
   </body>
 </html>

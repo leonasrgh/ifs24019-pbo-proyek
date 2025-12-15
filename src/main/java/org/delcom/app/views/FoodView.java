@@ -2,6 +2,8 @@ package org.delcom.app.views;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.delcom.app.dto.CoverFoodForm;
@@ -52,11 +54,11 @@ public class FoodView {
         // Autentikasi user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if ((authentication instanceof AnonymousAuthenticationToken)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof User)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         User authUser = (User) principal;
         model.addAttribute("auth", authUser);
@@ -85,11 +87,11 @@ public class FoodView {
         // Autentikasi user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if ((authentication instanceof AnonymousAuthenticationToken)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof User)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         User authUser = (User) principal;
 
@@ -151,11 +153,11 @@ public class FoodView {
         // Autentikasi user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if ((authentication instanceof AnonymousAuthenticationToken)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof User)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         User authUser = (User) principal;
 
@@ -215,11 +217,11 @@ public class FoodView {
         // Autentikasi user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if ((authentication instanceof AnonymousAuthenticationToken)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof User)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         User authUser = (User) principal;
 
@@ -274,11 +276,11 @@ public class FoodView {
         // Autentikasi user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if ((authentication instanceof AnonymousAuthenticationToken)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof User)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         User authUser = (User) principal;
         model.addAttribute("auth", authUser);
@@ -321,11 +323,11 @@ public class FoodView {
         // Autentikasi user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if ((authentication instanceof AnonymousAuthenticationToken)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof User)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         User authUser = (User) principal;
 
@@ -396,23 +398,40 @@ public class FoodView {
         // Autentikasi user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if ((authentication instanceof AnonymousAuthenticationToken)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof User)) {
-            return "redirect:/auth/logout";
+            return "redirect:/auth/login";
         }
         User authUser = (User) principal;
         model.addAttribute("auth", authUser);
 
-        // Ambil statistics untuk chart
-        var statistics = foodService.getNutritionStatistics(authUser.getId());
-        model.addAttribute("statistics", statistics);
-
-        // Ambil semua foods untuk referensi
+        // Ambil foods dulu
         var foods = foodService.getAllFoods(authUser.getId(), "");
         model.addAttribute("foods", foods);
 
+        // Ambil statistics dengan fallback
+        Map<String, Object> statistics;
+        try {
+            statistics = foodService.getNutritionStatistics(authUser.getId());
+            if (statistics == null) {
+                statistics = createEmptyStatistics();
+            }
+        } catch (Exception e) {
+            statistics = createEmptyStatistics();
+        }
+        model.addAttribute("statistics", statistics);
+
         return ConstUtil.TEMPLATE_PAGES_FOODS_STATISTICS;
+    }
+
+    // Helper method untuk create empty statistics
+    private Map<String, Object> createEmptyStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("caloriesByCategory", new HashMap<String, Double>());
+        stats.put("averageNutrition", new HashMap<String, Double>());
+        stats.put("countByCategory", new HashMap<String, Long>());
+        return stats;
     }
 }

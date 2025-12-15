@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/base}"
+  lang="id"
+>
+  <head>
+    <title>Statistik Nutrisi - Nutrition App</title>
+  </head>
+
+  <body>
+    <!-- Konten Utama -->
+    <div layout:fragment="content" class="container py-5">
+      <!-- Header -->
+      <div class="row mb-4">
+        <div class="col">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
+              <li class="breadcrumb-item active">Statistik Nutrisi</li>
+            </ol>
+          </nav>
+          <h1 class="display-5">📊 Statistik & Analisis Nutrisi</h1>
+          <p class="text-muted">
+            Visualisasi data nutrisi makanan Anda dalam bentuk chart dan grafik
+          </p>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="row g-4 mb-5">
+        <div class="col-md-3">
+          <div class="card text-center shadow-sm h-100">
+            <div class="card-body">
+              <div class="display-4 text-primary mb-2">📋</div>
+              <h3 class="display-6" th:text="${foods.size()}">0</h3>
+              <p class="text-muted mb-0">Total Makanan</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card text-center shadow-sm h-100">
+            <div class="card-body">
+              <div class="display-4 text-danger mb-2">🔥</div>
+              <h3
+                class="display-6"
+                th:text="${statistics.averageNutrition?.get('calories') != null ? #numbers.formatDecimal(statistics.averageNutrition.get('calories'), 0, 0) : '0'}"
+              >
+                0
+              </h3>
+              <p class="text-muted mb-0">Rata-rata Kalori</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card text-center shadow-sm h-100">
+            <div class="card-body">
+              <div class="display-4 text-success mb-2">💪</div>
+              <h3
+                class="display-6"
+                th:text="${statistics.averageNutrition?.get('protein') != null ? #numbers.formatDecimal(statistics.averageNutrition.get('protein'), 0, 1) : '0'}"
+              >
+                0
+              </h3>
+              <p class="text-muted mb-0">Rata-rata Protein (g)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card text-center shadow-sm h-100">
+            <div class="card-body">
+              <div class="display-4 text-warning mb-2">🏷️</div>
+              <h3
+                class="display-6"
+                th:text="${statistics.countByCategory?.size() != null ? statistics.countByCategory.size() : '0'}"
+              >
+                0
+              </h3>
+              <p class="text-muted mb-0">Kategori Aktif</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="row g-4">
+        <!-- Chart 1: Calories by Category -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">📊 Total Kalori per Kategori</h5>
+            </div>
+            <div class="card-body">
+              <canvas id="caloriesByCategoryChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart 2: Count by Category -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0">🍽️ Jumlah Makanan per Kategori</h5>
+            </div>
+            <div class="card-body">
+              <canvas id="countByCategoryChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart 3: Average Nutrition -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-warning text-dark">
+              <h5 class="mb-0">📈 Rata-rata Nilai Nutrisi</h5>
+            </div>
+            <div class="card-body">
+              <canvas id="averageNutritionChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart 4: Nutrition Comparison -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-info text-white">
+              <h5 class="mb-0">🥧 Komposisi Makronutrien Rata-rata</h5>
+            </div>
+            <div class="card-body">
+              <canvas id="macroCompositionChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="row mt-5">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+              <h5 class="mb-0">📋 Detail Data Nutrisi per Kategori</h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th>Kategori</th>
+                      <th>Jumlah Makanan</th>
+                      <th>Total Kalori</th>
+                      <th>Rata-rata Kalori</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="entry : ${statistics.countByCategory}">
+                      <td>
+                        <span class="badge bg-primary" th:text="${entry.key}"
+                          >Category</span
+                        >
+                      </td>
+                      <td th:text="${entry.value}">0</td>
+                      <td
+                        th:text="${statistics.caloriesByCategory?.get(entry.key) != null ? #numbers.formatDecimal(statistics.caloriesByCategory.get(entry.key), 0, 0) + ' kcal' : '0 kcal'}"
+                      >
+                        0 kcal
+                      </td>
+                      <td
+                        th:text="${entry.value > 0 ? #numbers.formatDecimal(statistics.caloriesByCategory.get(entry.key) / entry.value, 0, 0) + ' kcal' : '0 kcal'}"
+                      >
+                        0 kcal
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <th:block layout:fragment="others-js">
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Data dari server
+        const statistics = /*[[${statistics}]]*/ {};
+
+        // Chart 1: Calories by Category (Bar Chart)
+        if (statistics.caloriesByCategory) {
+          const ctx1 = document
+            .getElementById("caloriesByCategoryChart")
+            .getContext("2d");
+          new Chart(ctx1, {
+            type: "bar",
+            data: {
+              labels: Object.keys(statistics.caloriesByCategory),
+              datasets: [
+                {
+                  label: "Total Kalori (kcal)",
+                  data: Object.values(statistics.caloriesByCategory),
+                  backgroundColor: [
+                    "rgba(255, 99, 132, 0.7)",
+                    "rgba(54, 162, 235, 0.7)",
+                    "rgba(255, 206, 86, 0.7)",
+                    "rgba(75, 192, 192, 0.7)",
+                    "rgba(153, 102, 255, 0.7)",
+                  ],
+                  borderColor: [
+                    "rgba(255, 99, 132, 1)",
+                    "rgba(54, 162, 235, 1)",
+                    "rgba(255, 206, 86, 1)",
+                    "rgba(75, 192, 192, 1)",
+                    "rgba(153, 102, 255, 1)",
+                  ],
+                  borderWidth: 2,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: {
+                legend: { display: false },
+              },
+              scales: {
+                y: { beginAtZero: true },
+              },
+            },
+          });
+        }
+
+        // Chart 2: Count by Category (Doughnut Chart)
+        if (statistics.countByCategory) {
+          const ctx2 = document
+            .getElementById("countByCategoryChart")
+            .getContext("2d");
+          new Chart(ctx2, {
+            type: "doughnut",
+            data: {
+              labels: Object.keys(statistics.countByCategory),
+              datasets: [
+                {
+                  label: "Jumlah Makanan",
+                  data: Object.values(statistics.countByCategory),
+                  backgroundColor: [
+                    "rgba(255, 99, 132, 0.8)",
+                    "rgba(54, 162, 235, 0.8)",
+                    "rgba(255, 206, 86, 0.8)",
+                    "rgba(75, 192, 192, 0.8)",
+                    "rgba(153, 102, 255, 0.8)",
+                  ],
+                  borderColor: "#fff",
+                  borderWidth: 2,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: {
+                legend: { position: "bottom" },
+              },
+            },
+          });
+        }
+
+        // Chart 3: Average Nutrition (Radar Chart)
+        if (statistics.averageNutrition) {
+          const ctx3 = document
+            .getElementById("averageNutritionChart")
+            .getContext("2d");
+          new Chart(ctx3, {
+            type: "radar",
+            data: {
+              labels: ["Protein", "Karbohidrat", "Lemak", "Serat"],
+              datasets: [
+                {
+                  label: "Rata-rata (gram)",
+                  data: [
+                    statistics.averageNutrition.protein || 0,
+                    statistics.averageNutrition.carbohydrates || 0,
+                    statistics.averageNutrition.fat || 0,
+                    statistics.averageNutrition.fiber || 0,
+                  ],
+                  backgroundColor: "rgba(102, 126, 234, 0.2)",
+                  borderColor: "rgba(102, 126, 234, 1)",
+                  borderWidth: 2,
+                  pointBackgroundColor: "rgba(102, 126, 234, 1)",
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              scales: {
+                r: {
+                  beginAtZero: true,
+                },
+              },
+            },
+          });
+        }
+
+        // Chart 4: Macro Composition (Pie Chart)
+        if (statistics.averageNutrition) {
+          const ctx4 = document
+            .getElementById("macroCompositionChart")
+            .getContext("2d");
+          new Chart(ctx4, {
+            type: "pie",
+            data: {
+              labels: ["Protein", "Karbohidrat", "Lemak", "Serat"],
+              datasets: [
+                {
+                  data: [
+                    statistics.averageNutrition.protein || 0,
+                    statistics.averageNutrition.carbohydrates || 0,
+                    statistics.averageNutrition.fat || 0,
+                    statistics.averageNutrition.fiber || 0,
+                  ],
+                  backgroundColor: [
+                    "rgba(75, 192, 192, 0.8)",
+                    "rgba(255, 206, 86, 0.8)",
+                    "rgba(255, 99, 132, 0.8)",
+                    "rgba(153, 102, 255, 0.8)",
+                  ],
+                  borderColor: "#fff",
+                  borderWidth: 2,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: {
+                legend: { position: "bottom" },
+              },
+            },
+          });
+        }
+        /*]]>*/
+      </script>
+    </th:block>
+  </body>
+</html>

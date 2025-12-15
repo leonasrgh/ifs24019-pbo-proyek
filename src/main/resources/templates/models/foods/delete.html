@@ -1,59 +1,131 @@
-<div th:fragment="deleteTodoModal">
-  <form th:action="@{/todos/delete}" method="post" th:object="${todoForm}">
-    <div class="modal fade" id="deleteTodoModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Hapus Todo</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
-
-          <div class="modal-body">
-            <div class="alert alert-danger">
-              Apakah kamu yakin ingin menghapus todo dengan judul
-              <strong id="deleteTodoTitle">Todo Title</strong>&nbsp;?
-            </div>
-
-            <!-- Hidden ID Todo -->
-            <input id="deleteTodoId" type="hidden" th:field="*{id}" />
-
-            <div class="mb-3">
-              <label for="deleteTodoConfirmTitle" class="form-label"
-                >Konfirmasi Judul</label
-              >
-              <input
-                id="deleteTodoConfirmTitle"
-                type="text"
-                class="form-control"
-                th:field="*{confirmTitle}"
-              />
-
-              <div
-                class="text-danger"
-                th:if="${#fields.hasErrors('confirmTitle')}"
-                th:errors="*{confirmTitle}"
-              ></div>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <!-- Modal Fragment -->
+    <div th:fragment="modal">
+      <div
+        class="modal fade"
+        id="deleteFoodModal"
+        tabindex="-1"
+        aria-labelledby="deleteFoodModalLabel"
+        aria-hidden="true"
+        th:classappend="${deleteFoodModalOpen} ? 'show d-block' : ''"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form
+              th:action="@{/foods/delete}"
+              method="post"
+              th:object="${foodForm}"
             >
-              Batal
-            </button>
-            <button type="submit" class="btn btn-danger">
-              Lanjutkan, Hapus
-            </button>
+              <!-- Hidden ID -->
+              <input type="hidden" name="id" th:value="${food?.id}" />
+
+              <!-- Modal Header -->
+              <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteFoodModalLabel">
+                  🗑️ Hapus Makanan
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+
+              <!-- Modal Body -->
+              <div class="modal-body">
+                <!-- Warning Box -->
+                <div class="alert alert-danger" role="alert">
+                  <h5 class="alert-heading">⚠️ Peringatan!</h5>
+                  <p>
+                    Anda akan menghapus makanan
+                    <strong th:text="${food?.name}">Food Name</strong>
+                  </p>
+                  <p class="mb-0">
+                    Tindakan ini tidak dapat dibatalkan. Cover dan semua data
+                    makanan akan dihapus secara permanen.
+                  </p>
+                </div>
+
+                <!-- Food Info -->
+                <div class="card mb-3" th:if="${food != null}">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-4" th:if="${food.cover}">
+                        <img
+                          th:src="@{'/foods/cover/' + ${food.cover}}"
+                          alt="Food cover"
+                          class="img-fluid rounded"
+                        />
+                      </div>
+                      <div th:class="${food.cover} ? 'col-8' : 'col-12'">
+                        <h6 th:text="${food.name}">Food Name</h6>
+                        <p class="small text-muted mb-1">
+                          <span class="badge bg-primary" th:text="${food.category}"
+                            >Category</span
+                          >
+                        </p>
+                        <p class="small mb-0">
+                          🔥 <span th:text="${food.calories}">0</span> kcal | 💪
+                          <span th:text="${food.protein}">0</span>g protein
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Confirmation Input -->
+                <div class="mb-3">
+                  <label for="confirmName" class="form-label">
+                    Untuk konfirmasi, ketik nama makanan:
+                    <strong th:text="${food?.name}">Food Name</strong>
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="confirmName"
+                    name="confirmName"
+                    placeholder="Ketik nama makanan untuk konfirmasi"
+                    required
+                  />
+                  <div class="form-text text-danger">
+                    Nama harus persis sama (case-sensitive)
+                  </div>
+                </div>
+              </div>
+
+              <!-- Modal Footer -->
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Batal
+                </button>
+                <button type="submit" class="btn btn-danger">
+                  🗑️ Ya, Hapus Makanan
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
+
+      <!-- Script untuk auto-show modal -->
+      <script th:inline="javascript">
+        /*<![CDATA[*/
+        const deleteModalOpen = /*[[${deleteFoodModalOpen}]]*/ false;
+        if (deleteModalOpen) {
+          const deleteModal = new bootstrap.Modal(
+            document.getElementById("deleteFoodModal")
+          );
+          deleteModal.show();
+        }
+        /*]]>*/
+      </script>
     </div>
-  </form>
-</div>
+  </body>
+</html>

@@ -17,7 +17,7 @@
         <div class="col">
           <h1 class="display-4">🍎 Dashboard Nutrisi</h1>
           <p class="lead">
-            Selamat datang, <strong th:text="${auth.name}">User</strong>!
+          Selamat datang, <strong th:text="${auth != null ? auth.name : 'Pengunjung'}">User</strong>!
           </p>
         </div>
         <div class="col-auto">
@@ -44,7 +44,10 @@
         <div class="col-md-3">
           <div class="card text-center shadow-sm">
             <div class="card-body">
-              <h3 class="display-4 text-danger" th:text="${statistics.averageNutrition?.get('calories') != null ? #numbers.formatDecimal(statistics.averageNutrition.get('calories'), 0, 0) : '0'}">0</h3>
+              <h3 
+                class="display-4 text-danger" 
+                th:text="${statistics != null and statistics.averageNutrition != null and statistics.averageNutrition.get('calories') != null ? #numbers.formatDecimal(statistics.averageNutrition.get('calories'), 0, 0) : '0'}"
+              >0</h3>
               <p class="text-muted mb-0">Rata-rata Kalori</p>
             </div>
           </div>
@@ -53,7 +56,10 @@
         <div class="col-md-3">
           <div class="card text-center shadow-sm">
             <div class="card-body">
-              <h3 class="display-4 text-success" th:text="${statistics.averageNutrition?.get('protein') != null ? #numbers.formatDecimal(statistics.averageNutrition.get('protein'), 0, 1) : '0'}">0</h3>
+              <h3 
+                class="display-4 text-success" 
+                th:text="${statistics != null and statistics.averageNutrition != null and statistics.averageNutrition.get('protein') != null ? #numbers.formatDecimal(statistics.averageNutrition.get('protein'), 0, 1) : '0'}"
+              >0</h3>
               <p class="text-muted mb-0">Rata-rata Protein (g)</p>
             </div>
           </div>
@@ -62,7 +68,10 @@
         <div class="col-md-3">
           <div class="card text-center shadow-sm">
             <div class="card-body">
-              <h3 class="display-4 text-warning" th:text="${statistics.countByCategory?.size() != null ? statistics.countByCategory.size() : '0'}">0</h3>
+              <h3 
+                class="display-4 text-warning" 
+                th:text="${statistics != null and statistics.countByCategory != null ? statistics.countByCategory.size() : '0'}"
+              >0</h3>
               <p class="text-muted mb-0">Kategori Makanan</p>
             </div>
           </div>
@@ -179,7 +188,7 @@
         const statistics = /*[[${statistics}]]*/ {};
 
         // Chart 1: Calories by Category (Bar Chart)
-        if (statistics.caloriesByCategory) {
+        if (statistics && statistics.caloriesByCategory && Object.keys(statistics.caloriesByCategory).length > 0) {
           const caloriesCtx = document
             .getElementById("caloriesByCategoryChart")
             .getContext("2d");
@@ -224,10 +233,14 @@
               },
             },
           });
+        } else {
+          // Show empty state message
+          const chartContainer = document.getElementById("caloriesByCategoryChart").parentElement;
+          chartContainer.innerHTML = '<p class="text-muted text-center py-5">📊 Belum ada data. Tambahkan makanan untuk melihat chart.</p>';
         }
 
         // Chart 2: Count by Category (Doughnut Chart)
-        if (statistics.countByCategory) {
+        if (statistics && statistics.countByCategory && Object.keys(statistics.countByCategory).length > 0) {
           const countCtx = document
             .getElementById("countByCategoryChart")
             .getContext("2d");
@@ -261,6 +274,10 @@
               },
             },
           });
+        } else {
+          // Show empty state message
+          const chartContainer = document.getElementById("countByCategoryChart").parentElement;
+          chartContainer.innerHTML = '<p class="text-muted text-center py-5">📊 Belum ada data. Tambahkan makanan untuk melihat chart.</p>';
         }
         /*]]>*/
       </script>

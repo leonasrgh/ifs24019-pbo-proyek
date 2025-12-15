@@ -5,33 +5,34 @@ import java.util.UUID;
 
 import org.delcom.app.configs.ApiResponse;
 import org.delcom.app.configs.AuthContext;
-import org.delcom.app.entities.AuthToken;
 import org.delcom.app.entities.User;
 import org.delcom.app.services.AuthTokenService;
 import org.delcom.app.services.UserService;
-import org.delcom.app.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Controller; 
 import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/api")
-public class UserController {
+@Controller
+// PERBAIKAN: Hapus @RequestMapping("/api") (Sudah sesuai permintaan Anda sebelumnya)
+public class UserController { 
     private final UserService userService;
     private final AuthTokenService authTokenService;
+
+    @Autowired
+    protected AuthContext authContext;
 
     public UserController(UserService userService, AuthTokenService authTokenService) {
         this.userService = userService;
         this.authTokenService = authTokenService;
     }
 
-    @Autowired
-    protected AuthContext authContext;
-
-    // Melakukan registrasi pengguna
-    // -------------------------------
-    @PostMapping("/auth/register")
+    // Melakukan registrasi pengguna (API)
+    // URL: /api/auth/register
+    @PostMapping("/api/auth/register")
+    @ResponseBody
     public ResponseEntity<ApiResponse<Map<String, UUID>>> registerUser(@RequestBody User reqUser) {
         if (reqUser.getName() == null || reqUser.getName().isEmpty()) {
             return ResponseEntity.badRequest().body(new ApiResponse<>("fail", "Data nama tidak valid", null));
@@ -51,6 +52,7 @@ public class UserController {
 
         String hashPassword = new BCryptPasswordEncoder().encode(reqUser.getPassword());
 
+        // CATATAN: UserService#createUser HARUS diubah agar menerima hashPassword
         User createdUser = userService.createUser(
                 reqUser.getName(),
                 reqUser.getEmail(),
@@ -62,54 +64,17 @@ public class UserController {
                 Map.of("id", createdUser.getId())));
     }
 
-    // Melakukan login pengguna
-    // -------------------------------
-    @PostMapping("/auth/login")
-    public ResponseEntity<ApiResponse<Map<String, String>>> loginUser(@RequestBody User reqUser) {
-        if (reqUser.getEmail() == null || reqUser.getEmail().isEmpty()) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>("fail", "Data tidak valid", null));
-        } else if (reqUser.getPassword() == null || reqUser.getPassword().isEmpty()) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>("fail", "Data tidak valid", null));
-        }
+    // *** METHOD loginUser DIHAPUS, DIGANTIKAN OLEH SPRING SECURITY ***
 
-        User existingUser = userService.getUserByEmail(reqUser.getEmail());
-        if (existingUser == null) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>("fail", "Email atau password salah", null));
-        }
-
-        boolean isPasswordMatch = new BCryptPasswordEncoder()
-                .matches(reqUser.getPassword(), existingUser.getPassword());
-        if (!isPasswordMatch) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>("fail", "Email atau password salah", null));
-        }
-
-        String jwtToken = JwtUtil.generateToken(existingUser.getId());
-
-        // Hapus token lama jika ada
-        AuthToken existingAuthToken = authTokenService.findUserToken(existingUser.getId(), jwtToken);
-        if (existingAuthToken != null) {
-            authTokenService.deleteAuthToken(existingUser.getId());
-        }
-
-        AuthToken authToken = new AuthToken(existingUser.getId(), jwtToken);
-        var createdAuthToken = authTokenService.createAuthToken(authToken);
-        if (createdAuthToken == null) {
-            return ResponseEntity.status(500).body(new ApiResponse<>("error", "Gagal membuat token autentikasi", null));
-        }
-
-        return ResponseEntity.ok().body(new ApiResponse<>(
-                "success",
-                "Login berhasil",
-                Map.of("authToken", jwtToken)));
-    }
-
-    // Get informasi pengguna
-    @GetMapping("/users/me")
+    // Get informasi pengguna (API)
+    // URL: /api/users/me
+    @GetMapping("/api/users/me")
+    @ResponseBody 
     public ResponseEntity<ApiResponse<Map<String, User>>> getUserInfo() {
 
         // Validasi autentikasi
         if (!authContext.isAuthenticated()) {
-            return ResponseEntity.status(401).body(new ApiResponse<>("fail", "Data tidak valid", null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("fail", "Data tidak valid", null));
         }
         User authUser = authContext.getAuthUser();
         authUser.setPassword(null); // Sembunyikan password dalam response
@@ -119,13 +84,15 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    // Mengubah informasi pengguna
-    @PutMapping("/users/me")
+    // Mengubah informasi pengguna (API)
+    // URL: /api/users/me
+    @PutMapping("/api/users/me")
+    @ResponseBody 
     public ResponseEntity<ApiResponse<User>> updateUser(@RequestBody User reqUser) {
 
         // Validasi autentikasi
         if (!authContext.isAuthenticated()) {
-            return ResponseEntity.status(401).body(new ApiResponse<>("fail", "Data tidak valid", null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("fail", "Data tidak valid", null));
         }
         User authUser = authContext.getAuthUser();
 
@@ -141,20 +108,22 @@ public class UserController {
                 reqUser.getEmail());
         if (updatedUser == null) {
             ApiResponse<User> response = new ApiResponse<>("fail", "User tidak ditemukan", null);
-            return ResponseEntity.status(404).body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
         ApiResponse<User> response = new ApiResponse<>("success", "User berhasil diupdate", null);
         return ResponseEntity.ok(response);
     }
 
-    // Mengubah password pengguna
-    @PutMapping("/users/me/password")
+    // Mengubah password pengguna (API)
+    // URL: /api/users/me/password
+    @PutMapping("/api/users/me/password")
+    @ResponseBody 
     public ResponseEntity<ApiResponse<Void>> updateUserPassword(@RequestBody Map<String, String> passwordPayload) {
 
         // Validasi autentikasi
         if (!authContext.isAuthenticated()) {
-            return ResponseEntity.status(401)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ApiResponse<>("fail", "Autentikasi tidak valid", null));
         }
 
@@ -179,10 +148,11 @@ public class UserController {
 
         // Update password baru
         String hashPassword = new BCryptPasswordEncoder().encode(newPassword);
+        // CATATAN: UserService#updatePassword HARUS diubah agar menerima hashPassword
         User updatedUser = userService.updatePassword(authUser.getId(), hashPassword);
         if (updatedUser == null) {
             ApiResponse<Void> response = new ApiResponse<>("fail", "User tidak ditemukan", null);
-            return ResponseEntity.status(404).body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
         // Hapus token lama setelah password diubah
@@ -190,5 +160,4 @@ public class UserController {
 
         return ResponseEntity.ok(new ApiResponse<>("success", "Password berhasil diupdate", null));
     }
-
 }

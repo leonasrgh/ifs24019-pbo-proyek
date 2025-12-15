@@ -18,7 +18,7 @@
 
     <!-- Judul -->
     <title layout:title-pattern="$CONTENT_TITLE">
-      Nutrition App - Sistem Nutrisi Makanan
+      🍎 MyCookbook - Sistem Informasi Nutrisi Makanan
     </title>
 
     <!-- Styles -->
@@ -76,6 +76,12 @@
         padding: 2rem 0;
         margin-top: 4rem;
       }
+
+      /* Active nav link */
+      .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 0.25rem;
+      }
     </style>
 
     <!-- Slot untuk CSS tambahan -->
@@ -87,7 +93,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-nutrition sticky-top">
       <div class="container-fluid">
         <a class="navbar-brand fw-bold" th:href="@{/}">
-          🍎 Nutrition App
+          🍎 MyCookbook
         </a>
         <button
           class="navbar-toggler"
@@ -100,17 +106,17 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto">
             <li class="nav-item">
-              <a class="nav-link" th:href="@{/}">
+              <a class="nav-link" th:href="@{/}" th:classappend="${#request.requestURI == '/' ? 'active' : ''}">
                 🏠 Dashboard
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" th:href="@{/foods}">
+              <a class="nav-link" th:href="@{/foods}" th:classappend="${#strings.startsWith(#request.requestURI, '/foods') ? 'active' : ''}">
                 📋 Daftar Makanan
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" th:href="@{/foods/statistics}">
+              <a class="nav-link" th:href="@{/foods/statistics}" th:classappend="${#request.requestURI == '/foods/statistics' ? 'active' : ''}">
                 📊 Statistik Nutrisi
               </a>
             </li>
@@ -156,10 +162,10 @@
     <footer class="footer-nutrition text-center">
       <div class="container">
         <p class="mb-2">
-          🍎 <strong>Nutrition App</strong> - Sistem Informasi Nutrisi Makanan
+          🍎 <strong>MyCookbook</strong> - Sistem Informasi Nutrisi Makanan
         </p>
         <p class="small text-muted mb-0">
-          Proyek Akhir PBO &copy; 2025 | Dibuat dengan ❤️ menggunakan Spring Boot
+          Proyek Akhir PBO &copy; 2025 | IFS24019 | Dibuat dengan ❤️ menggunakan Spring Boot
         </p>
       </div>
     </footer>
@@ -185,6 +191,7 @@
             text: successMessage,
             showConfirmButton: true,
             confirmButtonColor: "#667eea",
+            timer: 3000
           });
         }
 

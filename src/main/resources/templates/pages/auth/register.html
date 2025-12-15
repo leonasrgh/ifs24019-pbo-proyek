@@ -2,125 +2,313 @@
 <html
   xmlns:th="http://www.thymeleaf.org"
   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{layouts/base}"
+  lang="id"
 >
   <head>
-    <title>Daftar - Spring Boot Todolist</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    
+    <!-- Icon -->
+    <link rel="icon" th:href="@{/assets/images/logo.png}" type="image/x-icon" />
+    
+    <title>Register - MyCookbook</title>
+    
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/vendor/bootstrap-5.3.8-dist/css/bootstrap.min.css}"
+    />
+    
+    <!-- SweetAlert2 -->
+    <link
+      rel="stylesheet"
+      th:href="@{/assets/vendor/sweetalert2/dist/sweetalert2.min.css}"
+    />
+    
+    <style>
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding: 2rem 0;
+      }
+      
+      .register-container {
+        max-width: 500px;
+        width: 100%;
+        padding: 15px;
+      }
+      
+      .register-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+      
+      .register-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+      }
+      
+      .register-header h1 {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+      
+      .register-header p {
+        margin: 0;
+        opacity: 0.9;
+      }
+      
+      .register-body {
+        padding: 2rem;
+      }
+      
+      .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e9ecef;
+      }
+      
+      .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+      }
+      
+      .btn-register {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-weight: 600;
+        color: white;
+        width: 100%;
+        transition: transform 0.2s;
+      }
+      
+      .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+      
+      .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+      }
+      
+      .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+      }
+      
+      .login-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      
+      .login-link a:hover {
+        text-decoration: underline;
+      }
+      
+      .emoji-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+      
+      .password-requirements {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+      }
+    </style>
   </head>
+  
   <body>
-    <div layout:fragment="content" class="mt-5">
-      <form
-        th:action="@{/auth/register/post}"
-        method="post"
-        th:object="${registerForm}"
-      >
-        <div class="card mx-auto" style="max-width: 360px">
-          <div class="card-body">
-            <div>
-              <div class="text-center">
-                <img
-                  th:src="@{/assets/images/logo.png}"
-                  alt="Logo"
-                  width="64"
-                />
-                <hr />
-                <h5>Daftar</h5>
-                <span class="text-muted">
-                  Lengkapi form pendaftaran berikut untuk membuat akun baru
-                </span>
-                <hr />
-              </div>
-
-              <!-- Pesan Error Global -->
-              <div
-                th:if="${#fields.hasGlobalErrors()}"
-                class="alert alert-danger"
-              >
-                <th:block
-                  th:each="err : ${#fields.globalErrors()}"
-                  th:text="${err}"
-                ></th:block>
-              </div>
-
-              <!-- Nama -->
-              <div class="form-group mb-3">
-                <label for="inputName">Nama Lengkap</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="inputName"
-                  th:field="*{name}"
-                  th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
-                />
-                <div
-                  th:if="${#fields.hasErrors('name')}"
-                  class="invalid-feedback"
-                >
-                  <th:block
-                    th:each="err : ${#fields.errors('name')}"
-                    th:text="${err}"
-                  ></th:block>
-                </div>
-              </div>
-
-              <!-- Alamat Email -->
-              <div class="form-group mb-3">
-                <label for="inputEmail">Email</label>
-                <input
-                  type="email"
-                  class="form-control"
-                  id="inputEmail"
-                  th:field="*{email}"
-                  th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
-                />
-                <div
-                  th:if="${#fields.hasErrors('email')}"
-                  class="invalid-feedback"
-                >
-                  <th:block
-                    th:each="err : ${#fields.errors('email')}"
-                    th:text="${err}"
-                  ></th:block>
-                </div>
-              </div>
-
-              <!-- Kata Sandi -->
-              <div class="form-group mb-3">
-                <label for="inputPassword">Kata Sandi</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  id="inputPassword"
-                  th:field="*{password}"
-                  th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
-                />
-                <div
-                  th:if="${#fields.hasErrors('password')}"
-                  class="invalid-feedback"
-                >
-                  <th:block
-                    th:each="err : ${#fields.errors('password')}"
-                    th:text="${err}"
-                  ></th:block>
-                </div>
-              </div>
-
-              <!-- Tombol Masuk -->
-              <div class="form-group mt-3 text-end">
-                <button type="submit" class="btn btn-primary btn-block">
-                  Masuk
-                </button>
-              </div>
-
-              <hr />
-              <p class="text-center">
-                Sudah memiliki akun?
-                <a th:href="@{/auth/login}">Masuk</a>
-              </p>
+    <div class="register-container">
+      <div class="register-card">
+        <div class="register-header">
+          <div class="emoji-icon">🍎</div>
+          <h1>MyCookbook</h1>
+          <p>Sistem Informasi Nutrisi Makanan</p>
+        </div>
+        
+        <div class="register-body">
+          <h3 class="text-center mb-4">Buat Akun Baru</h3>
+          
+          <!-- Error Message -->
+          <div th:if="${error}" class="alert alert-danger" role="alert">
+            <strong>❌ Registrasi Gagal!</strong><br/>
+            <span th:text="${error}">Error message</span>
+          </div>
+          
+          <!-- Success Message -->
+          <div th:if="${success}" class="alert alert-success" role="alert">
+            <strong>✅ Berhasil!</strong><br/>
+            <span th:text="${success}">Success message</span>
+          </div>
+          
+          <!-- Register Form -->
+          <form th:action="@{/auth/register}" method="post">
+            <!-- Name -->
+            <div class="mb-3">
+              <label for="name" class="form-label">👤 Nama Lengkap</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                name="name"
+                placeholder="Masukkan nama lengkap"
+                required
+                autofocus
+                minlength="3"
+              />
             </div>
+            
+            <!-- Email -->
+            <div class="mb-3">
+              <label for="email" class="form-label">📧 Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                placeholder="contoh@email.com"
+                required
+              />
+              <div class="password-requirements">
+                Gunakan email aktif untuk login
+              </div>
+            </div>
+            
+            <!-- Password -->
+            <div class="mb-3">
+              <label for="password" class="form-label">🔒 Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                placeholder="Minimal 6 karakter"
+                required
+                minlength="6"
+              />
+              <div class="password-requirements">
+                Minimal 6 karakter, gunakan kombinasi huruf dan angka
+              </div>
+            </div>
+            
+            <!-- Confirm Password -->
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">🔒 Konfirmasi Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Ketik ulang password"
+                required
+                minlength="6"
+              />
+            </div>
+            
+            <!-- Terms & Conditions -->
+            <div class="mb-3 form-check">
+              <input
+                type="checkbox"
+                class="form-check-input"
+                id="terms"
+                required
+              />
+              <label class="form-check-label" for="terms">
+                Saya setuju dengan <strong>Syarat & Ketentuan</strong>
+              </label>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-register">
+              🚀 Daftar Sekarang
+            </button>
+          </form>
+          
+          <!-- Login Link -->
+          <div class="login-link">
+            <p class="text-muted mb-0">
+              Sudah punya akun?
+              <a th:href="@{/auth/login}">Masuk di sini</a>
+            </p>
           </div>
         </div>
-      </form>
+      </div>
+      
+      <!-- Footer -->
+      <div class="text-center mt-4 text-white">
+        <p class="mb-0">
+          <small>Proyek Akhir PBO &copy; 2025 | IFS24019</small>
+        </p>
+      </div>
     </div>
+    
+    <!-- Bootstrap JS -->
+    <script
+      th:src="@{/assets/vendor/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js}"
+    ></script>
+    
+    <!-- SweetAlert2 -->
+    <script
+      th:src="@{/assets/vendor/sweetalert2/dist/sweetalert2.all.min.js}"
+    ></script>
+    
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Password confirmation validation
+        const password = document.getElementById("password");
+        const confirmPassword = document.getElementById("confirmPassword");
+        
+        confirmPassword.addEventListener("input", function() {
+          if (password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity("Password tidak cocok!");
+          } else {
+            confirmPassword.setCustomValidity("");
+          }
+        });
+        
+        // Show error with SweetAlert if exists
+        const errorMsg = "[[${error}]]";
+        if (errorMsg && errorMsg.length > 5) {
+          Swal.fire({
+            icon: "error",
+            title: "Registrasi Gagal",
+            text: errorMsg,
+            confirmButtonColor: "#667eea",
+          });
+        }
+        
+        // Show success with SweetAlert if exists
+        const successMsg = "[[${success}]]";
+        if (successMsg && successMsg.length > 5) {
+          Swal.fire({
+            icon: "success",
+            title: "Berhasil!",
+            text: successMsg,
+            confirmButtonColor: "#667eea",
+            timer: 2000
+          }).then(() => {
+            window.location.href = "/auth/login";
+          });
+        }
+      });
+    </script>
   </body>
 </html>
