@@ -1,58 +1,179 @@
-<div th:fragment="editCoverTodoModal">
-  <form
-    th:action="@{/todos/edit-cover}"
-    method="post"
-    th:object="${coverTodoForm}"
-    enctype="multipart/form-data"
-  >
-    <div class="modal fade" id="editCoverTodoModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Ubah Cover Todo</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <!-- Modal Fragment untuk Upload/Edit Cover Food -->
+    <div th:fragment="modal">
+      <form
+        th:action="@{/foods/edit-cover}"
+        method="post"
+        th:object="${coverFoodForm}"
+        enctype="multipart/form-data"
+      >
+        <div 
+          class="modal fade" 
+          id="editCoverModal" 
+          tabindex="-1"
+          aria-labelledby="editCoverModalLabel"
+          aria-hidden="true"
+          th:classappend="${editCoverFoodModalOpen} ? 'show d-block' : ''"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <!-- Modal Header -->
+              <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editCoverModalLabel">
+                  🖼️ Upload / Ubah Cover Makanan
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
 
-          <div class="modal-body">
-            <!-- Hidden ID Todo -->
-            <input type="hidden" th:field="*{id}" />
+              <!-- Modal Body -->
+              <div class="modal-body">
+                <!-- Hidden ID Food -->
+                <input type="hidden" th:field="*{id}" />
 
-            <div class="mb-3">
-              <label class="form-label">Pilih Cover</label>
-              <input
-                type="file"
-                class="form-control"
-                th:field="*{coverFile}"
-                id="editCoverTodoFile"
-              />
+                <!-- File Upload -->
+                <div class="mb-3">
+                  <label for="coverFile" class="form-label">
+                    Pilih Gambar Cover <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    type="file"
+                    class="form-control"
+                    th:field="*{coverFile}"
+                    id="coverFile"
+                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                    required
+                  />
+                  <div class="form-text">
+                    Format: JPEG, PNG, GIF, atau WebP. Maksimal 5MB.
+                  </div>
 
-              <div
-                class="text-danger"
-                th:if="${#fields.hasErrors('coverFile')}"
-                th:errors="*{coverFile}"
-              ></div>
+                  <!-- Error message -->
+                  <div
+                    class="text-danger mt-2"
+                    th:if="${#fields.hasErrors('coverFile')}"
+                    th:errors="*{coverFile}"
+                  ></div>
+                </div>
+
+                <!-- Preview Image -->
+                <div class="mb-3" id="imagePreviewContainer" style="display: none;">
+                  <label class="form-label">Preview:</label>
+                  <div class="text-center">
+                    <img
+                      id="imagePreview"
+                      src=""
+                      alt="Preview"
+                      class="img-fluid rounded border"
+                      style="max-height: 300px; object-fit: contain;"
+                    />
+                  </div>
+                </div>
+
+                <!-- Info Alert -->
+                <div class="alert alert-info" role="alert">
+                  <small>
+                    <strong>💡 Tips:</strong> Gunakan gambar dengan resolusi yang baik 
+                    untuk hasil terbaik. Gambar akan otomatis di-resize sesuai tampilan.
+                  </small>
+                </div>
+              </div>
+
+              <!-- Modal Footer -->
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Batal
+                </button>
+                <button type="submit" class="btn btn-primary" id="btnSaveFoodCover">
+                  📤 Upload Cover
+                </button>
+              </div>
             </div>
           </div>
-
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Batal
-            </button>
-
-            <button type="submit" class="btn btn-primary" id="btnSaveCover">
-              Simpan
-            </button>
-          </div>
         </div>
-      </div>
+      </form>
+
+      <!-- Script untuk Image Preview & Validation -->
+      <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+          const coverFileInput = document.getElementById('coverFile');
+          const imagePreview = document.getElementById('imagePreview');
+          const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+          const btnSave = document.getElementById('btnSaveFoodCover');
+
+          if (coverFileInput) {
+            coverFileInput.addEventListener('change', function(e) {
+              const file = e.target.files[0];
+              
+              if (file) {
+                // Validasi file type
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                  alert('❌ Format file tidak valid!\n\nGunakan format: JPEG, PNG, GIF, atau WebP.');
+                  coverFileInput.value = '';
+                  imagePreviewContainer.style.display = 'none';
+                  return;
+                }
+
+                // Validasi file size (5MB)
+                const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                if (file.size > maxSize) {
+                  const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                  alert(`❌ Ukuran file terlalu besar!\n\nUkuran: ${sizeMB} MB\nMaksimal: 5 MB`);
+                  coverFileInput.value = '';
+                  imagePreviewContainer.style.display = 'none';
+                  return;
+                }
+
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                  imagePreview.src = e.target.result;
+                  imagePreviewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+
+                // Show file info
+                const sizeKB = (file.size / 1024).toFixed(2);
+                console.log(`✅ File valid: ${file.name} (${sizeKB} KB)`);
+              } else {
+                imagePreviewContainer.style.display = 'none';
+              }
+            });
+          }
+
+          // Auto-show modal jika ada error
+          const editCoverModalOpen = /*[[${editCoverFoodModalOpen}]]*/ false;
+          if (editCoverModalOpen) {
+            const modal = new bootstrap.Modal(document.getElementById('editCoverModal'));
+            modal.show();
+          }
+
+          // Form validation before submit
+          const form = btnSave?.closest('form');
+          if (form) {
+            form.addEventListener('submit', function(e) {
+              if (!coverFileInput.files || coverFileInput.files.length === 0) {
+                e.preventDefault();
+                alert('❌ Pilih gambar terlebih dahulu!');
+                return false;
+              }
+            });
+          }
+        });
+        /*]]>*/
+      </script>
     </div>
-  </form>
-</div>
+  </body>
+</html>

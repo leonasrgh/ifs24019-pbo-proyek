@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.delcom.app.configs.AuthContext;
 import org.delcom.app.dto.CoverFoodForm;
 import org.delcom.app.dto.FoodForm;
 import org.delcom.app.entities.Food;
@@ -13,11 +14,9 @@ import org.delcom.app.entities.User;
 import org.delcom.app.services.FileStorageService;
 import org.delcom.app.services.FoodService;
 import org.delcom.app.utils.ConstUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +39,9 @@ public class FoodView {
 
     private final FoodService foodService;
     private final FileStorageService fileStorageService;
+    
+    @Autowired
+    protected AuthContext authContext;
 
     public FoodView(FoodService foodService, FileStorageService fileStorageService) {
         this.foodService = foodService;
@@ -53,16 +55,11 @@ public class FoodView {
             HttpServletRequest request,
             Model model) {
         
-        // Autentikasi user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if ((authentication instanceof AnonymousAuthenticationToken)) {
+        // Validasi autentikasi menggunakan AuthContext
+        if (!authContext.isAuthenticated()) {
             return "redirect:/auth/login";
         }
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof User)) {
-            return "redirect:/auth/login";
-        }
-        User authUser = (User) principal;
+        User authUser = authContext.getAuthUser();
         model.addAttribute("auth", authUser);
 
         // TAMBAHKAN: currentPath untuk navbar
@@ -85,68 +82,120 @@ public class FoodView {
 
     @PostMapping("/add")
     public String postAddFood(@Valid @ModelAttribute("foodForm") FoodForm foodForm,
+            @RequestParam(value = "referer", required = false, defaultValue = "/foods") String referer,
             RedirectAttributes redirectAttributes,
             HttpSession session,
             Model model) {
 
-        // Autentikasi user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if ((authentication instanceof AnonymousAuthenticationToken)) {
+        // ========== LOGGING DEBUG START ==========
+        System.out.println("========================================");
+        System.out.println("POST /foods/add DIPANGGIL!");
+        System.out.println("Referer: " + referer);
+        System.out.println("========================================");
+        
+        // Validasi autentikasi menggunakan AuthContext
+        if (!authContext.isAuthenticated()) {
+            System.out.println("ERROR: User tidak terautentikasi");
             return "redirect:/auth/login";
         }
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof User)) {
+        
+        User authUser = authContext.getAuthUser();
+        if (authUser == null) {
+            System.out.println("ERROR: authUser adalah null");
             return "redirect:/auth/login";
         }
-        User authUser = (User) principal;
+        
+        System.out.println("User ID: " + authUser.getId());
+        System.out.println("User Name: " + authUser.getName());
+        
+        // DEBUG: Print semua data form
+        System.out.println("=== DATA FORM YANG DITERIMA ===");
+        System.out.println("Name: " + foodForm.getName());
+        System.out.println("Category: " + foodForm.getCategory());
+        System.out.println("ServingSize: " + foodForm.getServingSize());
+        System.out.println("Calories: " + foodForm.getCalories());
+        System.out.println("Protein: " + foodForm.getProtein());
+        System.out.println("Carbohydrates: " + foodForm.getCarbohydrates());
+        System.out.println("Fat: " + foodForm.getFat());
+        System.out.println("Fiber: " + foodForm.getFiber());
+        System.out.println("Description: " + foodForm.getDescription());
+        System.out.println("================================");
 
         // Validasi form
         if (foodForm.getName() == null || foodForm.getName().isBlank()) {
+            System.out.println("VALIDASI GAGAL: Nama makanan kosong");
             redirectAttributes.addFlashAttribute("error", "Nama makanan tidak boleh kosong");
             redirectAttributes.addFlashAttribute("addFoodModalOpen", true);
-            return "redirect:/foods";
+            return "redirect:" + referer;
         }
 
         if (!foodForm.isValidNutritionValues()) {
+            System.out.println("VALIDASI GAGAL: Nilai nutrisi tidak valid");
+            System.out.println("  - Calories: " + foodForm.getCalories());
+            System.out.println("  - Protein: " + foodForm.getProtein());
+            System.out.println("  - Carbs: " + foodForm.getCarbohydrates());
+            System.out.println("  - Fat: " + foodForm.getFat());
+            System.out.println("  - Fiber: " + foodForm.getFiber());
             redirectAttributes.addFlashAttribute("error", "Nilai nutrisi tidak valid");
             redirectAttributes.addFlashAttribute("addFoodModalOpen", true);
-            return "redirect:/foods";
+            return "redirect:" + referer;
         }
 
         if (foodForm.getServingSize() == null || foodForm.getServingSize().isBlank()) {
+            System.out.println("VALIDASI GAGAL: Ukuran porsi kosong");
             redirectAttributes.addFlashAttribute("error", "Ukuran porsi tidak boleh kosong");
             redirectAttributes.addFlashAttribute("addFoodModalOpen", true);
-            return "redirect:/foods";
+            return "redirect:" + referer;
         }
 
         if (foodForm.getCategory() == null || foodForm.getCategory().isBlank()) {
+            System.out.println("VALIDASI GAGAL: Kategori kosong");
             redirectAttributes.addFlashAttribute("error", "Kategori tidak boleh kosong");
             redirectAttributes.addFlashAttribute("addFoodModalOpen", true);
-            return "redirect:/foods";
+            return "redirect:" + referer;
         }
+
+        System.out.println("VALIDASI BERHASIL - Memanggil foodService.createFood()...");
 
         // Simpan food
-        var entity = foodService.createFood(
-                authUser.getId(),
-                foodForm.getName(),
-                foodForm.getCalories(),
-                foodForm.getProtein(),
-                foodForm.getCarbohydrates(),
-                foodForm.getFat(),
-                foodForm.getFiber(),
-                foodForm.getServingSize(),
-                foodForm.getCategory(),
-                foodForm.getDescription());
+        try {
+            var entity = foodService.createFood(
+                    authUser.getId(),
+                    foodForm.getName(),
+                    foodForm.getCalories(),
+                    foodForm.getProtein(),
+                    foodForm.getCarbohydrates(),
+                    foodForm.getFat(),
+                    foodForm.getFiber(),
+                    foodForm.getServingSize(),
+                    foodForm.getCategory(),
+                    foodForm.getDescription());
 
-        if (entity == null) {
-            redirectAttributes.addFlashAttribute("error", "Gagal menambahkan makanan");
+            if (entity == null) {
+                System.out.println("ERROR: foodService.createFood() return NULL");
+                redirectAttributes.addFlashAttribute("error", "Gagal menambahkan makanan");
+                redirectAttributes.addFlashAttribute("addFoodModalOpen", true);
+                return "redirect:" + referer;
+            }
+
+            System.out.println("✓ BERHASIL SIMPAN! Food ID: " + entity.getId());
+            System.out.println("✓ Food Name: " + entity.getName());
+            System.out.println("✓ Redirect ke: " + referer);
+            System.out.println("========================================");
+
+            // Redirect dengan pesan sukses
+            redirectAttributes.addFlashAttribute("success", "Makanan berhasil ditambahkan.");
+            return "redirect:" + referer;
+            
+        } catch (Exception e) {
+            System.out.println("EXCEPTION saat menyimpan:");
+            System.out.println("Message: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Terjadi error: " + e.getMessage());
             redirectAttributes.addFlashAttribute("addFoodModalOpen", true);
-            return "redirect:/foods";
+            return "redirect:" + referer;
         }
-
-        // Redirect dengan pesan sukses
-        redirectAttributes.addFlashAttribute("success", "Makanan berhasil ditambahkan.");
-        return "redirect:/foods";
+        // ========== LOGGING DEBUG END ==========
     }
 
     @PostMapping("/edit")
@@ -155,16 +204,11 @@ public class FoodView {
             HttpSession session,
             Model model) {
         
-        // Autentikasi user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if ((authentication instanceof AnonymousAuthenticationToken)) {
+        // Validasi autentikasi menggunakan AuthContext
+        if (!authContext.isAuthenticated()) {
             return "redirect:/auth/login";
         }
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof User)) {
-            return "redirect:/auth/login";
-        }
-        User authUser = (User) principal;
+        User authUser = authContext.getAuthUser();
 
         // Validasi form
         if (foodForm.getId() == null) {
@@ -219,16 +263,11 @@ public class FoodView {
             HttpSession session,
             Model model) {
 
-        // Autentikasi user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if ((authentication instanceof AnonymousAuthenticationToken)) {
+        // Validasi autentikasi menggunakan AuthContext
+        if (!authContext.isAuthenticated()) {
             return "redirect:/auth/login";
         }
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof User)) {
-            return "redirect:/auth/login";
-        }
-        User authUser = (User) principal;
+        User authUser = authContext.getAuthUser();
 
         // Validasi form
         if (foodForm.getId() == null) {
@@ -280,16 +319,11 @@ public class FoodView {
     public String getDetailFood(@PathVariable UUID foodId, 
                                 HttpServletRequest request,
                                 Model model) {
-        // Autentikasi user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if ((authentication instanceof AnonymousAuthenticationToken)) {
+        // Validasi autentikasi menggunakan AuthContext
+        if (!authContext.isAuthenticated()) {
             return "redirect:/auth/login";
         }
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof User)) {
-            return "redirect:/auth/login";
-        }
-        User authUser = (User) principal;
+        User authUser = authContext.getAuthUser();
         model.addAttribute("auth", authUser);
 
         // TAMBAHKAN: currentPath untuk navbar
@@ -330,16 +364,11 @@ public class FoodView {
             HttpSession session,
             Model model) {
 
-        // Autentikasi user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if ((authentication instanceof AnonymousAuthenticationToken)) {
+        // Validasi autentikasi menggunakan AuthContext
+        if (!authContext.isAuthenticated()) {
             return "redirect:/auth/login";
         }
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof User)) {
-            return "redirect:/auth/login";
-        }
-        User authUser = (User) principal;
+        User authUser = authContext.getAuthUser();
 
         if (coverFoodForm.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "File cover tidak boleh kosong");
@@ -405,16 +434,11 @@ public class FoodView {
     // Halaman Statistics/Chart
     @GetMapping("/statistics")
     public String getStatistics(HttpServletRequest request, Model model) {
-        // Autentikasi user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if ((authentication instanceof AnonymousAuthenticationToken)) {
+        // Validasi autentikasi menggunakan AuthContext
+        if (!authContext.isAuthenticated()) {
             return "redirect:/auth/login";
         }
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof User)) {
-            return "redirect:/auth/login";
-        }
-        User authUser = (User) principal;
+        User authUser = authContext.getAuthUser();
         model.addAttribute("auth", authUser);
 
         // TAMBAHKAN: currentPath untuk navbar

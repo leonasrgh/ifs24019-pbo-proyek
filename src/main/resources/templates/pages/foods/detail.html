@@ -27,7 +27,7 @@
           <div class="card shadow-sm">
             <img
               th:if="${food.cover}"
-              th:src="@{'/foods/cover/' + ${food.cover}}"
+              th:src="@{'/api/foods/covers/' + ${food.cover}}"
               class="card-img-top"
               th:alt="${food.name}"
               style="height: 400px; object-fit: cover"
