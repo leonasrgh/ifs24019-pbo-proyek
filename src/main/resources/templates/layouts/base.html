@@ -106,17 +106,20 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto">
             <li class="nav-item">
-              <a class="nav-link" th:href="@{/}" th:classappend="${#request.requestURI == '/' ? 'active' : ''}">
+              <a class="nav-link" th:href="@{/}" 
+                 th:classappend="${currentPath == '/' or currentPath == '/home' ? 'active' : ''}">
                 🏠 Dashboard
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" th:href="@{/foods}" th:classappend="${#strings.startsWith(#request.requestURI, '/foods') ? 'active' : ''}">
+              <a class="nav-link" th:href="@{/foods}" 
+                 th:classappend="${#strings.startsWith(currentPath, '/foods') and currentPath != '/foods/statistics' ? 'active' : ''}">
                 📋 Daftar Makanan
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" th:href="@{/foods/statistics}" th:classappend="${#request.requestURI == '/foods/statistics' ? 'active' : ''}">
+              <a class="nav-link" th:href="@{/foods/statistics}" 
+                 th:classappend="${currentPath == '/foods/statistics' ? 'active' : ''}">
                 📊 Statistik Nutrisi
               </a>
             </li>

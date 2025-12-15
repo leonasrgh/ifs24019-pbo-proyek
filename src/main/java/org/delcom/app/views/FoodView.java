@@ -23,6 +23,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
@@ -49,6 +50,7 @@ public class FoodView {
     @GetMapping
     public String getFoodList(@RequestParam(required = false) String search,
             @RequestParam(required = false) String category,
+            HttpServletRequest request,
             Model model) {
         
         // Autentikasi user
@@ -62,6 +64,9 @@ public class FoodView {
         }
         User authUser = (User) principal;
         model.addAttribute("auth", authUser);
+
+        // TAMBAHKAN: currentPath untuk navbar
+        model.addAttribute("currentPath", request.getRequestURI());
 
         // Ambil foods
         var foods = foodService.getAllFoods(authUser.getId(), search);
@@ -272,7 +277,9 @@ public class FoodView {
     }
 
     @GetMapping("/{foodId}")
-    public String getDetailFood(@PathVariable UUID foodId, Model model) {
+    public String getDetailFood(@PathVariable UUID foodId, 
+                                HttpServletRequest request,
+                                Model model) {
         // Autentikasi user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if ((authentication instanceof AnonymousAuthenticationToken)) {
@@ -284,6 +291,9 @@ public class FoodView {
         }
         User authUser = (User) principal;
         model.addAttribute("auth", authUser);
+
+        // TAMBAHKAN: currentPath untuk navbar
+        model.addAttribute("currentPath", request.getRequestURI());
 
         // Ambil food
         Food food = foodService.getFoodById(authUser.getId(), foodId);
@@ -394,7 +404,7 @@ public class FoodView {
 
     // Halaman Statistics/Chart
     @GetMapping("/statistics")
-    public String getStatistics(Model model) {
+    public String getStatistics(HttpServletRequest request, Model model) {
         // Autentikasi user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if ((authentication instanceof AnonymousAuthenticationToken)) {
@@ -406,6 +416,9 @@ public class FoodView {
         }
         User authUser = (User) principal;
         model.addAttribute("auth", authUser);
+
+        // TAMBAHKAN: currentPath untuk navbar
+        model.addAttribute("currentPath", request.getRequestURI());
 
         // Ambil foods dulu
         var foods = foodService.getAllFoods(authUser.getId(), "");

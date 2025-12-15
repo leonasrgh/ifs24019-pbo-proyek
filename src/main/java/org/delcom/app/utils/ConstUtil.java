@@ -9,7 +9,7 @@ public class ConstUtil {
     public static final String TEMPLATE_PAGES_AUTH_LOGIN = "pages/auth/login";
     public static final String TEMPLATE_PAGES_AUTH_REGISTER = "pages/auth/register";
     
-    // Home Page
+    // Home Page - PERBAIKAN: home.html ada di pages/ bukan pages/foods/
     public static final String TEMPLATE_PAGES_HOME = "pages/home";
     
     // Food Pages
